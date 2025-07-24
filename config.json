@@ -1,0 +1,65 @@
+{
+  "version": "2.1.0",
+  "command_name": "mac",
+  "default_settings": {
+    "screenshot_location": "Desktop",
+    "screenshot_format": "PNG",
+    "volume_step": 10,
+    "brightness_step": 10,
+    "color_output": true,
+    "debug_mode": false,
+    "auto_update_check": true
+  },
+  "aliases": {
+    "ip": "network:ip",
+    "cleanup": "system:cleanup",
+    "restart-finder": "finder:restart",
+    "kp": "dev:kill-port",
+    "vol": "audio:volume",
+    "dark": "display:dark-mode",
+    "light": "display:light-mode"
+  },
+  "categories": {
+    "finder": {
+      "enabled": true,
+      "description": "File visibility and Finder management"
+    },
+    "wifi": {
+      "enabled": true,
+      "description": "WiFi control and management"
+    },
+    "network": {
+      "enabled": true,
+      "description": "Network information and troubleshooting"
+    },
+    "system": {
+      "enabled": true,
+      "description": "System information and maintenance"
+    },
+    "dev": {
+      "enabled": true,
+      "description": "Developer tools and utilities"
+    },
+    "display": {
+      "enabled": true,
+      "description": "Display and appearance settings"
+    },
+    "dock": {
+      "enabled": true,
+      "description": "Dock management and positioning"
+    },
+    "audio": {
+      "enabled": true,
+      "description": "Audio control and device management"
+    },
+    "screenshot": {
+      "enabled": true,
+      "description": "Screenshot settings and management"
+    }
+  },
+  "user_preferences": {
+    "favorite_commands": [],
+    "command_history": [],
+    "last_used": null
+  }
+}

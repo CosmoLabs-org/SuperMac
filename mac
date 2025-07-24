@@ -1,0 +1,349 @@
+#!/bin/bash
+
+# Make this file executable
+chmod +x "$0" 2>/dev/null || true
+
+# =============================================================================
+# SuperMac - Main Dispatcher
+# =============================================================================
+# Professional command-line tool for macOS with organized, powerful shortcuts
+# 
+# Usage: mac <category> <action> [arguments]
+# 
+# Built by CosmoLabs - https://cosmolabs.org
+# Repository: https://github.com/CosmoLabs-org/SuperMac
+# License: MIT
+# =============================================================================
+
+set -euo pipefail  # Strict error handling
+
+# =============================================================================
+# Bootstrap and Load Utilities
+# =============================================================================
+
+# Get the directory where this script is located
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SUPERMAC_ROOT="$(dirname "$SCRIPT_DIR")"
+readonly LIB_DIR="$SUPERMAC_ROOT/lib"
+
+# Load shared utilities first
+if [[ -f "$LIB_DIR/utils.sh" ]]; then
+    # shellcheck source=../lib/utils.sh
+    source "$LIB_DIR/utils.sh"
+else
+    echo "ERROR: SuperMac utilities not found at $LIB_DIR/utils.sh" >&2
+    echo "Please ensure SuperMac is properly installed." >&2
+    exit 1
+fi
+
+# =============================================================================
+# Configuration & Constants
+# =============================================================================
+
+readonly SUPERMAC_VERSION="2.1.0"
+readonly MIN_MACOS_VERSION="10.15"
+
+# Define available categories and their metadata
+declare -A CATEGORIES=(
+    ["finder"]="📁:File visibility and Finder management"
+    ["wifi"]="🌐:WiFi control and management"
+    ["network"]="📡:Network information and troubleshooting"
+    ["system"]="🖥️:System information and maintenance"
+    ["dev"]="💻:Developer tools and utilities"
+    ["display"]="🖥️:Display and appearance settings"
+    ["dock"]="🚢:Dock management and positioning"
+    ["audio"]="🔊:Audio control and device management"
+    ["screenshot"]="📸:Screenshot settings and management"
+)
+
+# Global shortcuts (bypass category structure)
+declare -A GLOBAL_SHORTCUTS=(
+    ["ip"]="network:ip"
+    ["cleanup"]="system:cleanup"
+    ["restart-finder"]="finder:restart"
+    ["kp"]="dev:kill-port"
+    ["vol"]="audio:volume"
+    ["dark"]="display:dark-mode"
+    ["light"]="display:light-mode"
+    ["help"]="show_help"
+    ["version"]="show_version"
+)
+
+# =============================================================================
+# Help System
+# =============================================================================
+
+show_main_help() {
+    print_supermac_header
+    echo ""
+    echo -e "${BOLD}Usage:${NC} mac <category> <action> [arguments]"
+    echo ""
+    echo -e "${DIM}Professional command-line shortcuts for macOS developers and power users${NC}"
+    echo ""
+    
+    print_category_header "Available Categories" "📋" 65
+    
+    for category in $(printf '%s\n' "${!CATEGORIES[@]}" | sort); do
+        IFS=':' read -r emoji description <<< "${CATEGORIES[$category]}"
+        printf "${PURPLE}│${NC}  %-12s %s %-40s ${PURPLE}│${NC}\n" "$category" "$emoji" "$description"
+    done
+    
+    print_category_footer 65
+    echo ""
+    
+    print_header "Quick Commands:"
+    echo "  mac help <category>         Show commands for specific category"
+    echo "  mac search <term>           Search commands by keyword"
+    echo "  mac version                 Show version information"
+    echo ""
+    
+    print_header "Examples:"
+    echo "  mac finder restart          # Restart Finder"
+    echo "  mac wifi toggle             # Toggle WiFi on/off"
+    echo "  mac system info             # Show system information"
+    echo "  mac dev kill-port 3000      # Kill process on port 3000"
+    echo "  mac display dark-mode       # Switch to dark mode"
+    echo ""
+    
+    print_header "Global Shortcuts:"
+    echo "  mac ip                      # Quick IP address lookup"
+    echo "  mac cleanup                 # Quick system cleanup"
+    echo "  mac dark / mac light        # Quick appearance toggle"
+    echo ""
+    
+    echo -e "${DIM}Repository: $SUPERMAC_REPO${NC}"
+    echo -e "${DIM}Built with ❤️ by $SUPERMAC_AUTHOR${NC}"
+    echo ""
+}
+
+show_category_help() {
+    local category="$1"
+    
+    if [[ ! -v "CATEGORIES[$category]" ]]; then
+        print_error "Unknown category: $category"
+        echo ""
+        print_info "Available categories: $(printf '%s ' "${!CATEGORIES[@]}" | sort | tr '\n' ' ')"
+        print_info "Use 'mac help' to see all categories"
+        return 1
+    fi
+    
+    # Load the category module to get its help
+    load_module "$category"
+    
+    # Call the category's help function
+    if declare -f "${category}_help" >/dev/null; then
+        "${category}_help"
+    else
+        print_error "Help not available for category: $category"
+        print_info "The module may not be fully implemented yet."
+    fi
+}
+
+show_version() {
+    echo -e "${BOLD}$SUPERMAC_NAME v$SUPERMAC_VERSION${NC}"
+    echo -e "${DIM}Built by $SUPERMAC_AUTHOR - $SUPERMAC_URL${NC}"
+    echo ""
+    echo "System Information:"
+    echo "  macOS: $(sw_vers -productName) $(get_macos_version)"
+    echo "  Build: $(get_macos_build)"
+    echo "  Architecture: $(get_architecture)"
+    echo "  Shell: $(get_shell)"
+    echo "  SuperMac Location: $SUPERMAC_ROOT"
+    echo ""
+    echo "Available Categories: $(printf '%s ' "${!CATEGORIES[@]}" | sort | tr '\n' ' ')"
+    echo ""
+    echo -e "${DIM}Repository: $SUPERMAC_REPO${NC}"
+    echo -e "${DIM}License: MIT${NC}"
+}
+
+search_commands() {
+    local search_term="$1"
+    search_term=$(to_lower "$search_term")
+    
+    print_header "🔍 Search Results for: $search_term"
+    echo ""
+    
+    local found=false
+    
+    for category in $(printf '%s\n' "${!CATEGORIES[@]}" | sort); do
+        # Load module to search its commands
+        if load_module "$category" 2>/dev/null; then
+            # Get commands from module (this would need to be implemented in each module)
+            if declare -f "${category}_search" >/dev/null; then
+                local results
+                results=$("${category}_search" "$search_term")
+                if [[ -n "$results" ]]; then
+                    IFS=':' read -r emoji description <<< "${CATEGORIES[$category]}"
+                    print_category_header "$category" "$emoji" 50
+                    echo "$results"
+                    print_category_footer 50
+                    echo ""
+                    found=true
+                fi
+            fi
+        fi
+    done
+    
+    if [[ "$found" != true ]]; then
+        print_warning "No commands found matching '$search_term'"
+        echo ""
+        print_info "Try broader search terms or use 'mac help' to see all available commands"
+    fi
+}
+
+# =============================================================================
+# Command Validation & Routing
+# =============================================================================
+
+validate_environment() {
+    # Check macOS version
+    if ! check_macos; then
+        return 1
+    fi
+    
+    # Check if modules directory exists
+    if [[ ! -d "$LIB_DIR" ]]; then
+        die "SuperMac library directory not found: $LIB_DIR"
+    fi
+    
+    # Enable debug if requested
+    if [[ "${1:-}" == "--debug" ]]; then
+        enable_debug
+        shift
+    fi
+    
+    return 0
+}
+
+route_command() {
+    local category="$1"
+    local action="$2"
+    shift 2  # Remove category and action from arguments
+    
+    # Check if it's a global shortcut
+    if [[ -v "GLOBAL_SHORTCUTS[$category]" ]]; then
+        local shortcut="${GLOBAL_SHORTCUTS[$category]}"
+        
+        # Handle special cases
+        case "$shortcut" in
+            "show_help")
+                show_main_help
+                return 0
+                ;;
+            "show_version")
+                show_version
+                return 0
+                ;;
+            *)
+                # Parse category:action format
+                IFS=':' read -r real_category real_action <<< "$shortcut"
+                category="$real_category"
+                action="$real_action"
+                ;;
+        esac
+    fi
+    
+    # Validate category exists
+    if [[ ! -v "CATEGORIES[$category]" ]]; then
+        print_error "Unknown category: $category"
+        echo ""
+        print_info "Available categories: $(printf '%s ' "${!CATEGORIES[@]}" | sort | tr '\n' ' ')"
+        print_info "Use 'mac help' to see all categories and commands"
+        return 1
+    fi
+    
+    # Load the category module
+    if ! load_module "$category"; then
+        print_error "Failed to load module: $category"
+        return 1
+    fi
+    
+    # Check if action is provided
+    if [[ -z "$action" ]]; then
+        print_error "Action required for category '$category'"
+        print_info "Use 'mac help $category' to see available actions"
+        return 1
+    fi
+    
+    # Call the category's dispatcher function
+    local dispatcher_func="${category}_dispatch"
+    if declare -f "$dispatcher_func" >/dev/null; then
+        print_debug "Dispatching to $category:$action with args: $*"
+        "$dispatcher_func" "$action" "$@"
+    else
+        print_error "Category '$category' is not properly implemented"
+        print_info "Missing dispatcher function: $dispatcher_func"
+        return 1
+    fi
+}
+
+# =============================================================================
+# Main Entry Point
+# =============================================================================
+
+main() {
+    # Validate environment first
+    if ! validate_environment "$@"; then
+        return 1
+    fi
+    
+    # Handle no arguments
+    if [[ $# -eq 0 ]]; then
+        show_main_help
+        return 0
+    fi
+    
+    # Parse arguments
+    local category="$1"
+    local action="${2:-}"
+    
+    # Handle special commands
+    case "$category" in
+        "help"|"-h"|"--help")
+            if [[ -n "$action" ]]; then
+                show_category_help "$action"
+            else
+                show_main_help
+            fi
+            return 0
+            ;;
+        "version"|"-v"|"--version")
+            show_version
+            return 0
+            ;;
+        "search")
+            if [[ -z "$action" ]]; then
+                print_error "Search term required"
+                print_info "Usage: mac search <term>"
+                return 1
+            fi
+            search_commands "$action"
+            return 0
+            ;;
+        "debug")
+            enable_debug
+            print_success "Debug mode enabled"
+            shift
+            main "$@"
+            return $?
+            ;;
+        "--debug")
+            enable_debug
+            shift
+            main "$@"
+            return $?
+            ;;
+    esac
+    
+    # Route to appropriate handler
+    route_command "$@"
+}
+
+# =============================================================================
+# Script Execution
+# =============================================================================
+
+# Only run main if script is executed directly (not sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
