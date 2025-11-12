@@ -151,20 +151,29 @@ finder_toggle_hidden() {
 
 finder_reveal() {
     local target="$1"
-    
-    if [[ -z "$target" ]]; then
-        print_error "Path required"
-        print_info "Usage: mac finder reveal <path>"
+
+    # Validate required argument
+    if ! validate_required_arg "$target" "Path" "mac finder reveal <path>"; then
         return 1
     fi
-    
-    if [[ ! -e "$target" ]]; then
+
+    # Sanitize path for security
+    local safe_path
+    safe_path=$(sanitize_path "$target")
+    if [[ -z "$safe_path" ]]; then
+        print_error "Invalid or inaccessible path: $target"
+        return 1
+    fi
+
+    # Verify path exists
+    if [[ ! -e "$safe_path" ]]; then
         print_error "Path does not exist: $target"
         return 1
     fi
-    
+
     print_info "Revealing '$target' in Finder..."
-    open -R "$target"
+    # Use -- to prevent path from being interpreted as option
+    open -R -- "$safe_path"
     print_success "Path revealed in Finder!"
 }
 

@@ -248,6 +248,146 @@ dir_exists() {
 }
 
 # =============================================================================
+# Input Sanitization & Security Functions
+# =============================================================================
+
+# Sanitize file/directory paths to prevent command injection and path traversal
+# Usage: sanitize_path "/some/path"
+# Returns: sanitized absolute path or empty string if invalid
+sanitize_path() {
+    local path="$1"
+
+    # Check if path is provided
+    if [[ -z "$path" ]]; then
+        return 1
+    fi
+
+    # Remove dangerous characters that could be used for command injection
+    path="${path//;/}"
+    path="${path//|/}"
+    path="${path//&/}"
+    path="${path//\`/}"
+    path="${path//\$/}"
+    path="${path//(/}"
+    path="${path//)/}"
+
+    # Expand to absolute path and resolve symlinks
+    # This also prevents path traversal attacks
+    if [[ -e "$path" ]]; then
+        # Path exists - get real path
+        if command_exists realpath; then
+            realpath "$path" 2>/dev/null
+        elif command_exists readlink; then
+            # Fallback to readlink for macOS
+            local resolved
+            resolved=$(cd "$(dirname "$path")" 2>/dev/null && pwd -P)/$(basename "$path")
+            echo "$resolved"
+        else
+            # Last resort - just return absolute path
+            [[ "$path" = /* ]] && echo "$path" || echo "$(pwd)/$path"
+        fi
+    else
+        # Path doesn't exist - check if parent exists
+        local parent
+        parent=$(dirname "$path")
+        if [[ -d "$parent" ]]; then
+            local parent_abs
+            parent_abs=$(cd "$parent" 2>/dev/null && pwd -P)
+            echo "$parent_abs/$(basename "$path")"
+        else
+            return 1
+        fi
+    fi
+}
+
+# Sanitize general user input
+# Usage: sanitize_input "$user_input"
+# Returns: sanitized string safe for use in commands
+sanitize_input() {
+    local input="$1"
+
+    # Remove control characters
+    input="${input//[$'\001'-$'\037']/}"
+
+    # Remove shell metacharacters
+    input="${input//;/}"
+    input="${input//|/}"
+    input="${input//&/}"
+    input="${input//\`/}"
+    input="${input//\$/}"
+    input="${input//(/}"
+    input="${input//)/}"
+    input="${input//</ }"
+    input="${input//>/ }"
+
+    # Trim leading/trailing whitespace
+    input="$(echo "$input" | xargs)"
+
+    echo "$input"
+}
+
+# Validate port number (enhanced version)
+# Usage: validate_port 8080
+validate_port() {
+    local port="$1"
+
+    # Check if it's a number
+    if ! is_number "$port"; then
+        return 1
+    fi
+
+    # Check if in valid port range (1-65535)
+    if ! is_in_range "$port" 1 65535; then
+        return 1
+    fi
+
+    return 0
+}
+
+# Validate required argument with standardized error message
+# Usage: validate_required_arg "$arg" "argument name" "usage example"
+validate_required_arg() {
+    local arg="$1"
+    local name="$2"
+    local usage="${3:-}"
+
+    if [[ -z "$arg" ]]; then
+        print_error "$name is required"
+        [[ -n "$usage" ]] && print_info "Usage: $usage"
+        return 1
+    fi
+
+    return 0
+}
+
+# Escape string for safe use in shell commands
+# Usage: escaped=$(shell_escape "$string")
+shell_escape() {
+    local str="$1"
+    # Use printf %q if available (bash 4+)
+    if [[ "${BASH_VERSINFO[0]}" -ge 4 ]]; then
+        printf '%q' "$str"
+    else
+        # Fallback for older bash
+        echo "$str" | sed "s/'/'\\\\''/g; s/^/'/; s/$/'/"
+    fi
+}
+
+# Validate email format (basic check)
+# Usage: validate_email "user@example.com"
+validate_email() {
+    local email="$1"
+    [[ "$email" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]
+}
+
+# Validate URL format (basic check)
+# Usage: validate_url "https://example.com"
+validate_url() {
+    local url="$1"
+    [[ "$url" =~ ^https?://[a-zA-Z0-9.-]+(/.*)?$ ]]
+}
+
+# =============================================================================
 # System Information Functions
 # =============================================================================
 

@@ -128,8 +128,8 @@ dock_set_autohide() {
     fi
     
     if dock_restart; then
-        print_success "Dock auto-hide $action"d!"
-        
+        print_success "Dock auto-hide ${action}ed!"
+
         if [[ "$action" == "enable" ]]; then
             print_info "💡 Move cursor to screen edge to show dock"
         else
