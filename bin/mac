@@ -43,31 +43,63 @@ fi
 # SUPERMAC_VERSION is defined in lib/utils.sh (single source of truth)
 readonly MIN_MACOS_VERSION="10.15"
 
-# Define available categories and their metadata
-declare -A CATEGORIES=(
-    ["finder"]="📁:File visibility and Finder management"
-    ["wifi"]="🌐:WiFi control and management"
-    ["network"]="📡:Network information and troubleshooting"
-    ["system"]="🖥️:System information and maintenance"
-    ["dev"]="💻:Developer tools and utilities"
-    ["display"]="🖥️:Display and appearance settings"
-    ["dock"]="🚢:Dock management and positioning"
-    ["audio"]="🔊:Audio control and device management"
-    ["screenshot"]="📸:Screenshot settings and management"
+# Define available categories (Bash 3.2-compatible: parallel arrays)
+readonly CAT_NAMES=(audio dev display dock finder network screenshot system wifi)
+readonly CAT_META=(
+    "audio:🔊:Audio control and device management"
+    "dev:💻:Developer tools and utilities"
+    "display:🖥️:Display and appearance settings"
+    "dock:🚢:Dock management and positioning"
+    "finder:📁:File visibility and Finder management"
+    "network:📡:Network information and troubleshooting"
+    "screenshot:📸:Screenshot settings and management"
+    "system:🖥️:System information and maintenance"
+    "wifi:🌐:WiFi control and management"
 )
 
-# Global shortcuts (bypass category structure)
-declare -A GLOBAL_SHORTCUTS=(
-    ["ip"]="network:ip"
-    ["cleanup"]="system:cleanup"
-    ["restart-finder"]="finder:restart"
-    ["kp"]="dev:kill-port"
-    ["vol"]="audio:volume"
-    ["dark"]="display:dark-mode"
-    ["light"]="display:light-mode"
-    ["help"]="show_help"
-    ["version"]="show_version"
-)
+# Look up category metadata by name (returns "emoji:description")
+get_category_meta() {
+    local name="$1"
+    local entry
+    for entry in "${CAT_META[@]}"; do
+        if [[ "$entry" == "$name:"* ]]; then
+            echo "${entry#*:}"
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Check if a category exists
+has_category() {
+    local name="$1"
+    local n
+    for n in "${CAT_NAMES[@]}"; do
+        [[ "$n" == "$name" ]] && return 0
+    done
+    return 1
+}
+
+# Get sorted category list
+get_categories() {
+    echo "${CAT_NAMES[@]}" | tr ' ' '\n' | sort
+}
+
+# Global shortcuts (Bash 3.2-compatible: case statement)
+get_shortcut() {
+    case "$1" in
+        ip)             echo "network:ip" ;;
+        cleanup)        echo "system:cleanup" ;;
+        restart-finder) echo "finder:restart" ;;
+        kp)             echo "dev:kill-port" ;;
+        vol)            echo "audio:volume" ;;
+        dark)           echo "display:dark-mode" ;;
+        light)          echo "display:light-mode" ;;
+        help)           echo "show_help" ;;
+        version)        echo "show_version" ;;
+        *)              return 1 ;;
+    esac
+}
 
 # =============================================================================
 # Help System
@@ -83,8 +115,10 @@ show_main_help() {
     
     print_category_header "Available Categories" "📋" 65
     
-    for category in $(printf '%s\n' "${!CATEGORIES[@]}" | sort); do
-        IFS=':' read -r emoji description <<< "${CATEGORIES[$category]}"
+    for category in $(get_categories); do
+        local meta
+        meta=$(get_category_meta "$category")
+        IFS=':' read -r emoji description <<< "$meta"
         printf "${PURPLE}│${NC}  %-12s %s %-40s ${PURPLE}│${NC}\n" "$category" "$emoji" "$description"
     done
     
@@ -119,10 +153,10 @@ show_main_help() {
 show_category_help() {
     local category="$1"
     
-    if [[ ! -v "CATEGORIES[$category]" ]]; then
+    if ! has_category "$category"; then
         print_error "Unknown category: $category"
         echo ""
-        print_info "Available categories: $(printf '%s ' "${!CATEGORIES[@]}" | sort | tr '\n' ' ')"
+        print_info "Available categories: $(get_categories | tr '\n' ' ')"
         print_info "Use 'mac help' to see all categories"
         return 1
     fi
@@ -150,7 +184,7 @@ show_version() {
     echo "  Shell: $(get_shell)"
     echo "  SuperMac Location: $SUPERMAC_ROOT"
     echo ""
-    echo "Available Categories: $(printf '%s ' "${!CATEGORIES[@]}" | sort | tr '\n' ' ')"
+    echo "Available Categories: $(get_categories | tr '\n' ' ')"
     echo ""
     echo -e "${DIM}Repository: $SUPERMAC_REPO${NC}"
     echo -e "${DIM}License: MIT${NC}"
@@ -165,7 +199,7 @@ search_commands() {
     
     local found=false
     
-    for category in $(printf '%s\n' "${!CATEGORIES[@]}" | sort); do
+    for category in $(get_categories); do
         # Load module to search its commands
         if load_module "$category" 2>/dev/null; then
             # Get commands from module (this would need to be implemented in each module)
@@ -173,7 +207,9 @@ search_commands() {
                 local results
                 results=$("${category}_search" "$search_term")
                 if [[ -n "$results" ]]; then
-                    IFS=':' read -r emoji description <<< "${CATEGORIES[$category]}"
+                    local meta
+                    meta=$(get_category_meta "$category")
+                    IFS=':' read -r emoji description <<< "$meta"
                     print_category_header "$category" "$emoji" 50
                     echo "$results"
                     print_category_footer 50
@@ -221,9 +257,8 @@ route_command() {
     shift 2  # Remove category and action from arguments
     
     # Check if it's a global shortcut
-    if [[ -v "GLOBAL_SHORTCUTS[$category]" ]]; then
-        local shortcut="${GLOBAL_SHORTCUTS[$category]}"
-        
+    local shortcut
+    shortcut=$(get_shortcut "$category") && {
         # Handle special cases
         case "$shortcut" in
             "show_help")
@@ -241,13 +276,13 @@ route_command() {
                 action="$real_action"
                 ;;
         esac
-    fi
+    }
     
     # Validate category exists
-    if [[ ! -v "CATEGORIES[$category]" ]]; then
+    if ! has_category "$category"; then
         print_error "Unknown category: $category"
         echo ""
-        print_info "Available categories: $(printf '%s ' "${!CATEGORIES[@]}" | sort | tr '\n' ' ')"
+        print_info "Available categories: $(get_categories | tr '\n' ' ')"
         print_info "Use 'mac help' to see all categories and commands"
         return 1
     fi
