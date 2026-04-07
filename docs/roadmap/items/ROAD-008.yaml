@@ -1,0 +1,10 @@
+id: ROAD-008
+created_at: 2026-04-07T21:03:54.946661+02:00
+updated_at: 2026-04-07T21:03:54.948107+02:00
+title: 'BUG-004: Missing install modules'
+description: 'Add wifi.sh, dock.sh, audio.sh, screenshot.sh to install.sh download list. File: bin/install.sh:154-162'
+status: captured
+tags:
+    - area:install
+    - area:distribution
+parent: ROAD-001

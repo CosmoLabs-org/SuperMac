@@ -1,0 +1,9 @@
+id: ROAD-014
+created_at: 2026-04-07T21:04:07.757061+02:00
+updated_at: 2026-04-07T21:04:07.758644+02:00
+title: Fix .gitignore
+description: Add .DS_Store, dist/, *.tar.gz, *.log, *.tmp, .idea/, .vscode/
+status: captured
+tags:
+    - area:project-hygiene
+parent: ROAD-001

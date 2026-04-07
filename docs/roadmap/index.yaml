@@ -1,0 +1,76 @@
+version: "1.0"
+project: SuperMac
+last_updated: 2026-04-07T21:04:15.974636+02:00
+next_id: 16
+items:
+    - id: ROAD-015
+      title: Create project CLAUDE.md
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T21:04:07.802577+02:00
+    - id: ROAD-014
+      title: Fix .gitignore
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T21:04:07.757061+02:00
+    - id: ROAD-013
+      title: Create LICENSE file
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T21:04:07.722345+02:00
+    - id: ROAD-012
+      title: Fix version mismatch (2.1.0 → 0.1.1)
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T21:04:07.689457+02:00
+    - id: ROAD-011
+      title: 'BUG-008: Delete root duplicate files'
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T21:04:07.648249+02:00
+    - id: ROAD-010
+      title: 'BUG-006: dev.sh decimal comparison'
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T21:04:07.615423+02:00
+    - id: ROAD-009
+      title: 'BUG-005: dock.sh string concatenation'
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T21:04:07.580927+02:00
+    - id: ROAD-008
+      title: 'BUG-004: Missing install modules'
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T21:03:54.946661+02:00
+    - id: ROAD-007
+      title: 'BUG-003: Apple Silicon page size'
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T21:03:54.911909+02:00
+    - id: ROAD-006
+      title: 'BUG-002: Full airport binary path'
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T21:03:54.875531+02:00
+    - id: ROAD-005
+      title: 'BUG-001: Targeted /tmp cleanup'
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T21:03:54.837017+02:00
+    - id: ROAD-004
+      title: 'Phase 3: Growth'
+      status: captured
+      created_at: 2026-04-07T21:03:43.240749+02:00
+    - id: ROAD-003
+      title: 'Phase 2: Quality'
+      status: captured
+      created_at: 2026-04-07T21:03:35.779468+02:00
+    - id: ROAD-002
+      title: 'Phase 1: Foundation'
+      status: captured
+      created_at: 2026-04-07T21:03:27.194193+02:00
+    - id: ROAD-001
+      title: 'Phase 0: Critical Fixes'
+      status: planned
+      created_at: 2026-04-07T21:03:18.745679+02:00

@@ -1,0 +1,13 @@
+id: ROAD-001
+created_at: 2026-04-07T21:03:18.745679+02:00
+updated_at: 2026-04-07T21:04:15.974427+02:00
+title: 'Phase 0: Critical Fixes'
+description: 'Must-fix items: broken functionality, security risks, missing modules. 8 bugs from audit. Target: 1-2 days.'
+status: planned
+tags:
+    - phase:0
+    - priority:critical
+    - area:stability
+refs:
+    - type: plan
+      path: docs/audit/latest/upgrade-plan.md

@@ -1,0 +1,13 @@
+id: ROAD-003
+created_at: 2026-04-07T21:03:35.779468+02:00
+updated_at: 2026-04-07T21:03:35.780007+02:00
+title: 'Phase 2: Quality'
+description: 'Split utils.sh god file, module auto-discovery, --yes flag, boolean parsing, install verification, uninstall improvements, docs accuracy. Target: 1 week.'
+status: captured
+tags:
+    - phase:2
+    - priority:medium
+    - area:architecture
+refs:
+    - type: plan
+      path: docs/audit/latest/upgrade-plan.md

@@ -1,0 +1,10 @@
+id: ROAD-005
+created_at: 2026-04-07T21:03:54.837017+02:00
+updated_at: 2026-04-07T21:03:54.838645+02:00
+title: 'BUG-001: Targeted /tmp cleanup'
+description: 'Replace rm -rf /tmp/* with find targeting user-owned files older than 7 days. File: lib/system.sh:173'
+status: captured
+tags:
+    - area:security
+    - area:system
+parent: ROAD-001

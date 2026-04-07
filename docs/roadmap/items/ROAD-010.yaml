@@ -1,0 +1,9 @@
+id: ROAD-010
+created_at: 2026-04-07T21:04:07.615423+02:00
+updated_at: 2026-04-07T21:04:07.617001+02:00
+title: 'BUG-006: dev.sh decimal comparison'
+description: Replace string comparison [[  > 5.0 ]] with bc -l numeric comparison at lib/dev.sh:281-283.
+status: captured
+tags:
+    - area:dev
+parent: ROAD-001

@@ -1,0 +1,13 @@
+id: ROAD-002
+created_at: 2026-04-07T21:03:27.194193+02:00
+updated_at: 2026-04-07T21:03:27.194728+02:00
+title: 'Phase 1: Foundation'
+description: 'Build quality foundation: shellcheck, expanded tests, single-source version, config decision, NO_COLOR support. Target: 3-5 days.'
+status: captured
+tags:
+    - phase:1
+    - priority:high
+    - area:quality
+refs:
+    - type: plan
+      path: docs/audit/latest/upgrade-plan.md
