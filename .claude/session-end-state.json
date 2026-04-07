@@ -2,6 +2,15 @@
   "session_date": "2026-04-07",
   "mode": "quick",
   "started_at": "2026-04-07T16:12:48Z",
-  "phases": {},
+  "phases": {
+    "3": {
+      "status": "completed",
+      "at": "2026-04-07T16:15:48Z"
+    },
+    "6": {
+      "status": "completed",
+      "at": "2026-04-07T16:18:00Z"
+    }
+  },
   "verified": false
 }
