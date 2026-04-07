@@ -1,0 +1,17 @@
+{
+  "agent": "ux-cli",
+  "overall_score": 72,
+  "sub_scores": {
+    "command_design": 78,
+    "help_system": 82,
+    "error_messages": 80,
+    "output_formatting": 75,
+    "discoverability": 72,
+    "accessibility": 55
+  },
+  "findings_count": 17,
+  "critical": 2,
+  "high": 4,
+  "medium": 6,
+  "low": 5
+}

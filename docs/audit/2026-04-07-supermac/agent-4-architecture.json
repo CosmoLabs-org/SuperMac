@@ -1,0 +1,17 @@
+{
+  "agent": "architecture",
+  "overall_score": 62,
+  "sub_scores": {
+    "module_coupling": 75,
+    "separation_of_concerns": 70,
+    "extensibility": 55,
+    "shared_utilities": 65,
+    "file_organization": 35,
+    "configuration_design": 50
+  },
+  "findings_count": 11,
+  "critical": 1,
+  "high": 3,
+  "medium": 4,
+  "low": 3
+}

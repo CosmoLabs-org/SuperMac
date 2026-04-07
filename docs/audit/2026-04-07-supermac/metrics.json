@@ -1,0 +1,61 @@
+{
+  "audit_date": "2026-04-07",
+  "code_metrics": {
+    "total_lines_all_files": 12797,
+    "unique_functional_lines": 7200,
+    "duplicate_root_copies": 5154,
+    "duplicate_percentage": 71.6,
+    "avg_module_lines": 462,
+    "largest_module": "dev.sh (610 lines)",
+    "smallest_module": "finder.sh (313 lines)"
+  },
+  "module_metrics": {
+    "finder": {"lines": 313, "commands": 6},
+    "wifi": {"lines": 507, "commands": 9},
+    "network": {"lines": 484, "commands": 9},
+    "system": {"lines": 541, "commands": 9},
+    "dev": {"lines": 610, "commands": 13},
+    "display": {"lines": 428, "commands": 8},
+    "dock": {"lines": 573, "commands": 8},
+    "audio": {"lines": 519, "commands": 11},
+    "screenshot": {"lines": 590, "commands": 10}
+  },
+  "test_metrics": {
+    "total_tests": 50,
+    "command_coverage_pct": 7.8,
+    "modules_with_zero_tests": 3,
+    "assertion_type": "exit_code_only",
+    "output_validation": false,
+    "edge_case_tests": false,
+    "integration_tests": false,
+    "ci_ready": false
+  },
+  "security_metrics": {
+    "vulnerabilities_found": 17,
+    "critical": 2,
+    "high": 4,
+    "medium": 6,
+    "low": 3,
+    "eval_usage": 0,
+    "exec_usage": 0,
+    "sudo_operations": 6,
+    "unsanitized_inputs": 5,
+    "temp_file_safety_issues": 3
+  },
+  "quality_metrics": {
+    "shellcheck_issues": 24,
+    "version_locations": 7,
+    "inconsistent_boolean_parsing": true,
+    "no_color_support": true,
+    "no_yes_flag": true,
+    "docs_accuracy_pct": 40
+  },
+  "git_metrics": {
+    "total_commits": 4,
+    "tracked_files": 36,
+    "untracked_files": 1,
+    "ds_store_tracked": true,
+    "gitignore_entries": 1,
+    "license_file": false
+  }
+}

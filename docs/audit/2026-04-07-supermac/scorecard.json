@@ -1,0 +1,37 @@
+{
+  "project": "SuperMac",
+  "version": "2.1.0",
+  "audit_date": "2026-04-07",
+  "mode": "fresh",
+  "agents_dispatched": 8,
+  "agents_completed": 8,
+  "overall_score": 50.5,
+  "maturity": "Developing",
+  "agent_scores": {
+    "code-quality": {"overall": 52, "sub": {"dry_compliance": 15, "consistency": 72, "error_handling": 55, "variable_safety": 60, "input_validation": 68, "shellcheck_compat": 40}},
+    "core-logic": {"overall": 62, "sub": {"routing_robustness": 78, "module_loading": 58, "macos_api_usage": 55, "configuration_handling": 20, "data_flow_integrity": 60, "edge_case_handling": 50}},
+    "security": {"overall": 38, "sub": {"injection_resistance": 45, "privilege_management": 30, "install_security": 15, "path_safety": 55, "secrets_management": 80, "temp_file_safety": 25}},
+    "architecture": {"overall": 62, "sub": {"module_coupling": 75, "separation_of_concerns": 70, "extensibility": 55, "shared_utilities": 65, "file_organization": 35, "configuration_design": 50}},
+    "testing": {"overall": 28, "sub": {"coverage": 12, "test_quality": 20, "test_diversity": 15, "test_isolation": 30, "ci_readiness": 45, "assertion_quality": 15}},
+    "distribution": {"overall": 38, "sub": {"install_quality": 45, "install_safety": 30, "packaging": 35, "version_management": 55, "uninstall_support": 25, "git_hygiene": 20}},
+    "documentation": {"overall": 52, "sub": {"readme_quality": 70, "inline_help": 80, "developer_docs": 55, "code_comments": 65, "doc_accuracy": 40, "examples_quality": 65}},
+    "ux-cli": {"overall": 72, "sub": {"command_design": 78, "help_system": 82, "error_messages": 80, "output_formatting": 75, "discoverability": 72, "accessibility": 55}}
+  },
+  "findings_summary": {
+    "total": 132,
+    "critical": 18,
+    "high": 40,
+    "medium": 47,
+    "low": 27
+  },
+  "top_risks": [
+    "config.json is dead code - never read at runtime",
+    "5,154 lines of duplicated files at project root",
+    "rm -rf /tmp/* in system cleanup breaks running apps",
+    "No LICENSE file despite MIT claims",
+    "Installer missing 4 of 9 modules from download",
+    "airport binary not on PATH - WiFi features silently degraded",
+    "vm_stat page size hardcoded to 4096 - wrong on Apple Silicon",
+    "No integrity verification on curl|bash install"
+  ]
+}

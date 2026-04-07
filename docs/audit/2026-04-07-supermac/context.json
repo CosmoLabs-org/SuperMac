@@ -1,0 +1,49 @@
+{
+  "project": "SuperMac",
+  "version": "2.1.0",
+  "description": "Professional macOS CLI tool with modular architecture",
+  "author": "CosmoLabs",
+  "license": "MIT (claimed, no LICENSE file)",
+  "repository": "https://github.com/CosmoLabs-org/SuperMac",
+  "audit_date": "2026-04-07",
+  "project_type": "structured",
+  "languages": ["bash"],
+  "total_lines": 12797,
+  "unique_lines": 7200,
+  "duplicate_lines": 5154,
+  "modules": 9,
+  "commands": 77,
+  "test_coverage_commands_pct": 7.8,
+  "cicd": false,
+  "branch": "main",
+  "commits": 4,
+  "files": {
+    "dispatcher": "bin/mac (349 lines)",
+    "utilities": "lib/utils.sh (589 lines)",
+    "modules": [
+      "lib/finder.sh (313 lines)",
+      "lib/wifi.sh (507 lines)",
+      "lib/network.sh (484 lines)",
+      "lib/system.sh (541 lines)",
+      "lib/dev.sh (610 lines)",
+      "lib/display.sh (428 lines)",
+      "lib/dock.sh (573 lines)",
+      "lib/audio.sh (519 lines)",
+      "lib/screenshot.sh (590 lines)"
+    ],
+    "tests": "tests/test.sh (509 lines)",
+    "install": "bin/install.sh (356 lines)",
+    "setup": "setup.sh (436 lines)",
+    "makefile": "Makefile (330 lines)",
+    "config": "config/config.json (65 lines)"
+  },
+  "key_findings": {
+    "root_duplicates": 14,
+    "missing_license": true,
+    "config_dead_code": true,
+    "install_missing_modules": ["wifi", "dock", "audio", "screenshot"],
+    "apple_silicon_memory_bug": true,
+    "airport_path_broken": true,
+    "destructive_tmp_cleanup": true
+  }
+}

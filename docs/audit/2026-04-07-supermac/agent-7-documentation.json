@@ -1,0 +1,17 @@
+{
+  "agent": "documentation",
+  "overall_score": 52,
+  "sub_scores": {
+    "readme_quality": 70,
+    "inline_help": 80,
+    "developer_docs": 55,
+    "code_comments": 65,
+    "doc_accuracy": 40,
+    "examples_quality": 65
+  },
+  "findings_count": 22,
+  "critical": 3,
+  "high": 7,
+  "medium": 8,
+  "low": 4
+}

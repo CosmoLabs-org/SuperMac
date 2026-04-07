@@ -1,0 +1,17 @@
+{
+  "agent": "security",
+  "overall_score": 38,
+  "sub_scores": {
+    "injection_resistance": 45,
+    "privilege_management": 30,
+    "install_security": 15,
+    "path_safety": 55,
+    "secrets_management": 80,
+    "temp_file_safety": 25
+  },
+  "findings_count": 17,
+  "critical": 2,
+  "high": 4,
+  "medium": 6,
+  "low": 3
+}

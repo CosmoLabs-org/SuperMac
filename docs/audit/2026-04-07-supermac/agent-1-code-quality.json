@@ -1,0 +1,23 @@
+{
+  "agent": "code-quality",
+  "overall_score": 52,
+  "sub_scores": {
+    "dry_compliance": 15,
+    "consistency": 72,
+    "error_handling": 55,
+    "variable_safety": 60,
+    "input_validation": 68,
+    "shellcheck_compat": 40
+  },
+  "findings_count": 19,
+  "critical": 3,
+  "high": 5,
+  "medium": 7,
+  "low": 4,
+  "metrics": {
+    "total_lines_analyzed": 7199,
+    "files_analyzed": 17,
+    "duplicate_lines": 5154,
+    "duplicate_percentage": 71.6
+  }
+}

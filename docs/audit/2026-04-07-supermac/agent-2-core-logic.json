@@ -1,0 +1,17 @@
+{
+  "agent": "core-logic",
+  "overall_score": 62,
+  "sub_scores": {
+    "routing_robustness": 78,
+    "module_loading": 58,
+    "macos_api_usage": 55,
+    "configuration_handling": 20,
+    "data_flow_integrity": 60,
+    "edge_case_handling": 50
+  },
+  "findings_count": 14,
+  "critical": 1,
+  "high": 6,
+  "medium": 5,
+  "low": 3
+}

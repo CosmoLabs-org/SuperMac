@@ -1,0 +1,17 @@
+{
+  "agent": "distribution",
+  "overall_score": 38,
+  "sub_scores": {
+    "install_quality": 45,
+    "install_safety": 30,
+    "packaging": 35,
+    "version_management": 55,
+    "uninstall_support": 25,
+    "git_hygiene": 20
+  },
+  "findings_count": 15,
+  "critical": 3,
+  "high": 5,
+  "medium": 5,
+  "low": 3
+}
