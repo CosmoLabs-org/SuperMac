@@ -123,10 +123,13 @@ Root-level `.sh` files are DUPLICATES of `lib/` counterparts. They must be delet
   - v2.3.0: Phase 2 quality (utils.sh split, module auto-discovery, --yes flag)
   - v3.0.0: Phase 3 growth (Homebrew formula, CI/CD, auto-update)
 
-### 12. Consider first official release
+### 12. Run /upgrade-docs
+- Run `/upgrade-docs` at session start to bring all docs up to current project state
+- Ensures README, DEVELOPMENT.md, and other docs reflect post-fix reality
+
+### 13. Consider next release
 - After Phase 0 fixes are merged and tested
-- Tag as `v2.1.1` (patch release with critical fixes) or `v0.1.0` (if rebranding as initial stable)
-- Ensure LICENSE is in place before any release
+- Bump version from 0.1.1 with `ccs version --release`
 - Create GitHub release with changelog
 
 ## Working Conventions
