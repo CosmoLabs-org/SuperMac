@@ -40,7 +40,7 @@ fi
 # Configuration & Constants
 # =============================================================================
 
-readonly SUPERMAC_VERSION="2.1.0"
+# SUPERMAC_VERSION is defined in lib/utils.sh (single source of truth)
 readonly MIN_MACOS_VERSION="10.15"
 
 # Define available categories and their metadata

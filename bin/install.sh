@@ -159,6 +159,10 @@ download_supermac_files() {
         "lib/network.sh:$HOME/.supermac/lib/network.sh:Network module"
         "lib/system.sh:$HOME/.supermac/lib/system.sh:System module"
         "lib/dev.sh:$HOME/.supermac/lib/dev.sh:Developer module"
+        "lib/wifi.sh:$HOME/.supermac/lib/wifi.sh:WiFi module"
+        "lib/dock.sh:$HOME/.supermac/lib/dock.sh:Dock module"
+        "lib/audio.sh:$HOME/.supermac/lib/audio.sh:Audio module"
+        "lib/screenshot.sh:$HOME/.supermac/lib/screenshot.sh:Screenshot module"
         "config/config.json:$HOME/.supermac/config/config.json:Configuration file"
     )
     
