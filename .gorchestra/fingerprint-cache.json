@@ -1,0 +1,18 @@
+{
+  "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "project_name": "SuperMac",
+  "language": "unknown",
+  "framework": "",
+  "directories": [
+    "bin",
+    "config",
+    "docs",
+    "lib",
+    "plugins",
+    "tests"
+  ],
+  "dependencies": null,
+  "has_tests": true,
+  "has_ci": false,
+  "generated_at": "2026-04-07T15:12:25.556861+02:00"
+}

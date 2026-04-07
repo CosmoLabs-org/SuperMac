@@ -1,0 +1,12 @@
+# Staged changelog entries for next release
+# Use: ccs changelog preview to see formatted output
+# Use: ccs changelog finalize <version> "<slug>" to release
+
+version: pending
+entries:
+    added: []
+    fixed: []
+    changed: []
+    deprecated: []
+    removed: []
+    security: []
