@@ -1,0 +1,13 @@
+id: BUG-004
+type: bug
+created_at: 2026-04-07T17:57:44.437507+02:00
+updated_at: 2026-04-07T17:57:44.437512+02:00
+source: local
+severity: critical
+status: open
+area: reliability
+title: Installer missing 4 of 9 library modules
+description: 'install.sh:154-162 only downloads 6 of 10 library files. Missing: wifi.sh, dock.sh, audio.sh, screenshot.sh. Users installing via curl|bash get success message but 35+ commands are broken.'
+fix_direction: Add lib/wifi.sh, lib/dock.sh, lib/audio.sh, lib/screenshot.sh to the download_supermac_files() files array in install.sh
+affected_files:
+    - bin/install.sh

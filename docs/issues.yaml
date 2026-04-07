@@ -1,0 +1,64 @@
+version: "1.0"
+project: SuperMac
+last_updated: 2026-04-07T17:57:44.904816+02:00
+next_bug_id: 9
+next_feat_id: 1
+next_task_id: 1
+next_imp_id: 1
+issues:
+    - id: BUG-008
+      type: bug
+      status: open
+      title: 5154 lines of duplicate files at project root
+      severity: high
+      area: infra
+      created_at: 2026-04-07T17:57:44.904555+02:00
+    - id: BUG-007
+      type: bug
+      status: open
+      title: config.json is dead code never read at runtime
+      severity: high
+      area: ux
+      created_at: 2026-04-07T17:57:44.781954+02:00
+    - id: BUG-006
+      type: bug
+      status: open
+      title: dev.sh CPU comparison uses string ordering broken for values >= 10%
+      severity: high
+      area: reliability
+      created_at: 2026-04-07T17:57:44.680302+02:00
+    - id: BUG-005
+      type: bug
+      status: open
+      title: dock.sh string concatenation parse error at line 131
+      severity: high
+      area: reliability
+      created_at: 2026-04-07T17:57:44.563688+02:00
+    - id: BUG-004
+      type: bug
+      status: open
+      title: Installer missing 4 of 9 library modules
+      severity: critical
+      area: reliability
+      created_at: 2026-04-07T17:57:44.437507+02:00
+    - id: BUG-003
+      type: bug
+      status: open
+      title: Wrong memory statistics on Apple Silicon (page size hardcoded 4096)
+      severity: critical
+      area: reliability
+      created_at: 2026-04-07T17:57:44.332315+02:00
+    - id: BUG-002
+      type: bug
+      status: open
+      title: Airport binary never found - WiFi features silently degraded
+      severity: critical
+      area: reliability
+      created_at: 2026-04-07T17:57:44.23531+02:00
+    - id: BUG-001
+      type: bug
+      status: open
+      title: rm -rf /tmp/* in system cleanup breaks running applications
+      severity: critical
+      area: reliability
+      created_at: 2026-04-07T17:56:58.403942+02:00

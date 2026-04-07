@@ -1,0 +1,24 @@
+id: BUG-008
+type: bug
+created_at: 2026-04-07T17:57:44.904555+02:00
+updated_at: 2026-04-07T17:57:44.90456+02:00
+source: local
+severity: high
+status: open
+area: infra
+title: 5154 lines of duplicate files at project root
+description: All 10 lib/*.sh files, bin/mac, and config.json are duplicated identically at project root (confirmed via diff). 71.6% of codebase is dead duplicates. Contributors may edit wrong copy. Creates maintenance drift.
+fix_direction: Delete all root-level duplicate files. Add *.sh to .gitignore at root level except install.sh/setup.sh.
+affected_files:
+    - audio.sh
+    - dev.sh
+    - display.sh
+    - dock.sh
+    - finder.sh
+    - network.sh
+    - screenshot.sh
+    - system.sh
+    - utils.sh
+    - wifi.sh
+    - mac
+    - config.json

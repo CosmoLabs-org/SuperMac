@@ -1,0 +1,13 @@
+id: BUG-002
+type: bug
+created_at: 2026-04-07T17:57:44.23531+02:00
+updated_at: 2026-04-07T17:57:44.235319+02:00
+source: local
+severity: critical
+status: open
+area: reliability
+title: Airport binary never found - WiFi features silently degraded
+description: wifi.sh uses command_exists airport which checks PATH. The airport binary lives at /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport - NOT on default PATH. command_exists always fails, silently disabling WiFi scan, signal strength, BSSID, channel info.
+fix_direction: 'Use full path: /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport. Check with [[ -x $path ]] instead of command_exists.'
+affected_files:
+    - lib/wifi.sh

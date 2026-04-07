@@ -1,0 +1,13 @@
+id: BUG-001
+type: bug
+created_at: 2026-04-07T17:56:58.403942+02:00
+updated_at: 2026-04-07T17:56:58.404058+02:00
+source: local
+severity: critical
+status: open
+area: reliability
+title: rm -rf /tmp/* in system cleanup breaks running applications
+description: lib/system.sh:173 runs rm -rf /tmp/* during cleanup. /tmp contains Unix sockets, PID files, temp databases for running apps. Deleting all contents crashes apps and corrupts data.
+fix_direction: 'Replace rm -rf /tmp/* with targeted cleanup using find with user/age filters: find ${TMPDIR:-/tmp} -type f -user $USER -atime +7 -delete'
+affected_files:
+    - lib/system.sh

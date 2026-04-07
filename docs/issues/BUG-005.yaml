@@ -1,0 +1,13 @@
+id: BUG-005
+type: bug
+created_at: 2026-04-07T17:57:44.563688+02:00
+updated_at: 2026-04-07T17:57:44.563699+02:00
+source: local
+severity: high
+status: open
+area: reliability
+title: dock.sh string concatenation parse error at line 131
+description: dock.sh:131 has print_success "Dock auto-hide $action"d! - the d! is outside quotes causing shellcheck parse errors (SC1046, SC1073, SC1078, SC1079) that cascade and suppress analysis of entire file.
+fix_direction: 'Fix to: print_success "Dock auto-hide ${action}d!"'
+affected_files:
+    - lib/dock.sh
