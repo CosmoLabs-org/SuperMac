@@ -278,9 +278,9 @@ dev_cpu_hogs() {
         local cmd_name
         cmd_name=$(echo "$command" | awk '{print $1}' | xargs basename)
         
-        if [[ "$cpu" > 5.0 ]]; then
+        if echo "$cpu > 5.0" | bc -l | grep -q 1; then
             printf "  %-20s ${RED}%6s%%${NC} %6s%% %8s\n" "$cmd_name" "$cpu" "$mem" "$pid"
-        elif [[ "$cpu" > 2.0 ]]; then
+        elif echo "$cpu > 2.0" | bc -l | grep -q 1; then
             printf "  %-20s ${YELLOW}%6s%%${NC} %6s%% %8s\n" "$cmd_name" "$cpu" "$mem" "$pid"
         else
             printf "  %-20s %6s%% %6s%% %8s\n" "$cmd_name" "$cpu" "$mem" "$pid"

@@ -11,7 +11,7 @@
 # =============================================================================
 # Version & Constants
 # =============================================================================
-readonly SUPERMAC_VERSION="2.1.0"
+readonly SUPERMAC_VERSION="0.1.1"
 readonly SUPERMAC_NAME="SuperMac"
 readonly SUPERMAC_AUTHOR="CosmoLabs"
 readonly SUPERMAC_URL="https://cosmolabs.org"

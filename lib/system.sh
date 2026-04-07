@@ -170,7 +170,7 @@ system_cleanup() {
     
     # Temporary files
     print_info "Cleaning temporary files..."
-    rm -rf /tmp/* 2>/dev/null || true
+    find "${TMPDIR:-/tmp}" -type f -user "$USER" -atime +7 -delete 2>/dev/null || true
     print_success "Temporary files cleaned"
     
     # Font caches
@@ -263,7 +263,8 @@ system_memory() {
     local memory_info
     memory_info=$(vm_stat)
     
-    local page_size=4096
+    local page_size
+    page_size=$(sysctl -n hw.pagesize)
     local pages_free pages_active pages_inactive pages_wired pages_compressed
     
     pages_free=$(echo "$memory_info" | grep "Pages free" | awk '{print $3}' | sed 's/\.//')

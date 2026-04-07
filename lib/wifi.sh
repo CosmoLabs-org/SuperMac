@@ -18,6 +18,8 @@
 # Built by CosmoLabs - https://cosmolabs.org
 # =============================================================================
 
+readonly AIRPORT_BIN="/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport"
+
 # =============================================================================
 # WiFi Power Management
 # =============================================================================
@@ -171,9 +173,9 @@ wifi_show_current_connection() {
     echo "  Connected to: $(print_command "$network")"
     
     # Get signal strength if available
-    if command_exists airport; then
+    if [[ -x "$AIRPORT_BIN" ]]; then
         local signal
-        signal=$(airport -I 2>/dev/null | awk '/agrCtlRSSI/{print $2}')
+        signal=$("$AIRPORT_BIN" -I 2>/dev/null | awk '/agrCtlRSSI/{print $2}')
         if [[ -n "$signal" ]]; then
             echo "  Signal strength: $(print_command "${signal} dBm")"
         fi
@@ -234,8 +236,8 @@ wifi_info() {
         print_header "Connection Details:"
         
         # Try to get detailed info using airport command line tool
-        if command_exists airport; then
-            airport -I 2>/dev/null | while read -r line; do
+        if [[ -x "$AIRPORT_BIN" ]]; then
+            "$AIRPORT_BIN" -I 2>/dev/null | while read -r line; do
                 case "$line" in
                     *"SSID"*) echo "  Network: $(echo "$line" | cut -d: -f2 | trim)" ;;
                     *"BSSID"*) echo "  Router: $(echo "$line" | cut -d: -f2 | trim)" ;;
@@ -285,8 +287,8 @@ wifi_scan() {
     print_info "Scanning for available WiFi networks..."
     
     # Use airport command for scanning if available
-    if command_exists airport; then
-        airport -s 2>/dev/null | head -20 | while read -r line; do
+    if [[ -x "$AIRPORT_BIN" ]]; then
+        "$AIRPORT_BIN" -s 2>/dev/null | head -20 | while read -r line; do
             if [[ -n "$line" && "$line" != *"SSID"* ]]; then
                 local ssid
                 ssid=$(echo "$line" | awk '{print $1}')
