@@ -1,1 +1,8 @@
 plugins/internal
+.DS_Store
+dist/
+*.tar.gz
+*.log
+*.tmp
+.idea/
+.vscode/
