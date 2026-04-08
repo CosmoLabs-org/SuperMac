@@ -1,9 +1,9 @@
 id: ROAD-025
 created_at: 2026-04-08T02:30:56.991903+02:00
-updated_at: 2026-04-08T02:31:29.120621+02:00
+updated_at: 2026-04-08T06:23:00.888735+02:00
 title: Output formatting system
 description: Writer interface with colored/JSON/quiet modes. NO_COLOR support. Non-TTY detection. FEAT-003.
-status: captured
+status: promoted
 priority: 95
 effort: small
 tags:

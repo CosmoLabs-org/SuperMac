@@ -1,6 +1,6 @@
 id: ROAD-017
 created_at: 2026-04-08T02:23:22.706815+02:00
-updated_at: 2026-04-08T02:28:10.972443+02:00
+updated_at: 2026-04-08T06:23:00.94572+02:00
 title: 'Go Rewrite: Foundation'
 description: |-
     Scaffold the Go project with Cobra CLI framework, module interface, registry, config system, output formatting, and platform abstraction layer. This is the foundation all modules build on. Must be done first before any module porting begins.
@@ -20,7 +20,7 @@ description: |-
 
     Dependencies: Phase 0 critical fixes (ROAD-001) should be complete so Bash version is stable as reference.
     Estimated effort: Large (3-5 days for one person, parallelizable with agents)
-status: planned
+status: promoted
 priority: 95
 effort: large
 tags:

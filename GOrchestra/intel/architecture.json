@@ -1,10 +1,10 @@
 {
   "version": "1.0",
-  "generated_at": "2026-04-08T04:44:44.260779+02:00",
+  "generated_at": "2026-04-08T04:47:32.48449+02:00",
   "generated_by": "GLM-4.7",
-  "expires_at": "2026-04-09T04:44:44.260779+02:00",
-  "last_analyzed_commit": "518d2def817eb06d4b0e107df9f0ea5eba23ad9c",
-  "summary": "A Go-based orchestration tool currently undergoing a rewrite, featuring a plugin architecture and heavily documented spec-driven development process.",
+  "expires_at": "2026-04-09T04:47:32.48449+02:00",
+  "last_analyzed_commit": "55ce05f34ac62fbc4af5d9bc38668cfe4d428651",
+  "summary": "A Go-based orchestration framework (GOrchestra) currently undergoing an active rewrite, featuring a plugin architecture and extensive specification documentation.",
   "architecture": "monolith",
   "primary_language": "Go",
   "hot_files": [
@@ -16,18 +16,20 @@
   ],
   "patterns": [
     "plugin-architecture",
-    "spec-driven-development",
-    "orchestration-pattern",
-    "session-based-workflow"
+    "configuration-driven",
+    "specification-by-example",
+    "session-based-development"
   ],
   "concerns": [
-    "ongoing-rewrite-may-cause-fragmentation-between-old-and-new-code",
-    "multiple-config-directories-may-lead-to-scattered-configuration",
-    "untracked-files-indicate-potential-uncommitted-work-or-neglect"
+    "scattered configuration across .claude/, .gorchestra/, and config/",
+    "active rewrite in progress creating potential state divergence",
+    "deeply nested documentation structure may indicate scope creep",
+    "bin/ and lib/ separation suggests potential build complexity"
   ],
   "suggestions": [
-    "consolidate-config-directories-into-a-single-location",
-    "complete-the-go-rewrite-before-adding-new-features",
-    "track-untracked-files-and-either-commit-or-gitignore-them"
+    "consolidate configuration directories into a single location",
+    "complete the Go rewrite before adding new features",
+    "flatten or reorganize the docs/ hierarchy for better discoverability",
+    "establish clear boundaries between GOrchestra orchestration and core logic"
   ]
 }

@@ -1,9 +1,9 @@
 id: ROAD-023
 created_at: 2026-04-08T02:30:56.918231+02:00
-updated_at: 2026-04-08T02:31:29.049177+02:00
+updated_at: 2026-04-08T06:23:00.810038+02:00
 title: Platform abstraction layer
 description: internal/platform/ with wrappers for osascript, defaults, airport, system_profiler, pmset, networksetup. Each function has a corresponding mock for testing.
-status: captured
+status: promoted
 priority: 97
 effort: medium
 tags:
