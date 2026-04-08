@@ -1,6 +1,6 @@
 id: ROAD-018
 created_at: 2026-04-08T02:23:22.749367+02:00
-updated_at: 2026-04-08T02:28:55.084699+02:00
+updated_at: 2026-04-08T06:44:16.980238+02:00
 title: 'Go Rewrite: Module Port'
 description: |-
     Port all 10 Bash modules from lib/*.sh to Go packages in internal/modules/. Each module implements the Module interface from ROAD-017. 1:1 feature parity — same commands, same behavior, same output.

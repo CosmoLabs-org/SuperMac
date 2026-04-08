@@ -1,35 +1,37 @@
 {
   "version": "1.0",
-  "generated_at": "2026-04-08T04:47:32.48449+02:00",
+  "generated_at": "2026-04-08T06:27:31.787762+02:00",
   "generated_by": "GLM-4.7",
-  "expires_at": "2026-04-09T04:47:32.48449+02:00",
-  "last_analyzed_commit": "55ce05f34ac62fbc4af5d9bc38668cfe4d428651",
-  "summary": "A Go-based orchestration framework (GOrchestra) currently undergoing an active rewrite, featuring a plugin architecture and extensive specification documentation.",
+  "expires_at": "2026-04-09T06:27:31.787763+02:00",
+  "last_analyzed_commit": "68f10802163da606499729975f6cc39ba5ec4b6a",
+  "summary": "Early-stage Go CLI rewrite of a project called supermac, scaffolded with Cobra and following standard Go layout conventions.",
   "architecture": "monolith",
   "primary_language": "Go",
   "hot_files": [
-    "lib/",
-    "config/",
-    "plugins/",
-    "docs/superpowers/specs/",
-    "GOrchestra/intel/"
+    "supermac-go/cmd/mac/main.go",
+    "supermac-go/internal/platform/platform.go",
+    "supermac-go/internal/module/registry_test.go",
+    "supermac-go/internal/config/config.go",
+    "supermac-go/internal/output/output.go"
   ],
   "patterns": [
-    "plugin-architecture",
-    "configuration-driven",
-    "specification-by-example",
-    "session-based-development"
+    "Standard Go project layout",
+    "Cobra CLI framework",
+    "Module registry pattern",
+    "Mock-based testing",
+    "Separation of concerns via internal packages"
   ],
   "concerns": [
-    "scattered configuration across .claude/, .gorchestra/, and config/",
-    "active rewrite in progress creating potential state divergence",
-    "deeply nested documentation structure may indicate scope creep",
-    "bin/ and lib/ separation suggests potential build complexity"
+    "Project appears to be in early scaffolding phase with minimal implementation",
+    "Empty top-level directories (bin/, lib/, config/, plugins/, tests/) suggest incomplete migration or planning",
+    "Duplicate config directories (config/ and supermac-go/internal/config/) may cause confusion",
+    "No domain logic evident yet beyond CLI structure"
   ],
   "suggestions": [
-    "consolidate configuration directories into a single location",
-    "complete the Go rewrite before adding new features",
-    "flatten or reorganize the docs/ hierarchy for better discoverability",
-    "establish clear boundaries between GOrchestra orchestration and core logic"
+    "Implement core domain logic in the module package",
+    "Consolidate configuration handling to avoid duplicate config paths",
+    "Remove or populate empty top-level directories to clarify project structure",
+    "Add integration tests as the feature set grows",
+    "Establish CI/CD pipeline for the Go rewrite"
   ]
 }
