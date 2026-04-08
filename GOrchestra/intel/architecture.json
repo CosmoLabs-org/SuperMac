@@ -1,34 +1,33 @@
 {
   "version": "1.0",
-  "generated_at": "2026-04-08T02:49:12.359518+02:00",
+  "generated_at": "2026-04-08T04:44:44.260779+02:00",
   "generated_by": "GLM-4.7",
-  "expires_at": "2026-04-09T02:49:12.359518+02:00",
-  "last_analyzed_commit": "03b66c53224a2b1b129062354511a310b5107c9b",
-  "summary": "A plugin-based monolith system called GOrchestra currently undergoing a documentation-driven rewrite from its original language to Go.",
+  "expires_at": "2026-04-09T04:44:44.260779+02:00",
+  "last_analyzed_commit": "518d2def817eb06d4b0e107df9f0ea5eba23ad9c",
+  "summary": "A Go-based orchestration tool currently undergoing a rewrite, featuring a plugin architecture and heavily documented spec-driven development process.",
   "architecture": "monolith",
   "primary_language": "Go",
   "hot_files": [
-    "docs/brainstorming/SOPs/",
-    "docs/architecture/",
-    "config/",
     "lib/",
+    "config/",
+    "plugins/",
+    "docs/superpowers/specs/",
     "GOrchestra/intel/"
   ],
   "patterns": [
-    "plugin architecture",
-    "configuration-driven design",
-    "documentation-first development"
+    "plugin-architecture",
+    "spec-driven-development",
+    "orchestration-pattern",
+    "session-based-workflow"
   ],
   "concerns": [
-    "active Go rewrite indicates potential instability in current codebase",
-    "scattered configuration across .claude/, .gorchestra/, and config/ directories",
-    "heavy documentation focus with recent commits being entirely docs-related",
-    "uncommitted changes (3 modified, 1 staged) during a rewrite phase"
+    "ongoing-rewrite-may-cause-fragmentation-between-old-and-new-code",
+    "multiple-config-directories-may-lead-to-scattered-configuration",
+    "untracked-files-indicate-potential-uncommitted-work-or-neglect"
   ],
   "suggestions": [
-    "consolidate configuration directories to reduce fragmentation",
-    "prioritize completing the Go rewrite over adding new features",
-    "establish a clear migration path from legacy code to Go implementation",
-    "address uncommitted changes before continuing rewrite work"
+    "consolidate-config-directories-into-a-single-location",
+    "complete-the-go-rewrite-before-adding-new-features",
+    "track-untracked-files-and-either-commit-or-gitignore-them"
   ]
 }
