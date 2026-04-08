@@ -1,9 +1,9 @@
 id: ROAD-006
 created_at: 2026-04-07T21:03:54.875531+02:00
-updated_at: 2026-04-07T21:03:54.876172+02:00
+updated_at: 2026-04-07T22:07:51.415939+02:00
 title: 'BUG-002: Full airport binary path'
 description: 'Define AIRPORT_BIN constant, use at lines 174/237/288, add executable guard. File: lib/wifi.sh'
-status: captured
+status: promoted
 tags:
     - area:wifi
 parent: ROAD-001

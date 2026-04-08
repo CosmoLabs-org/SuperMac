@@ -1,9 +1,9 @@
 id: ROAD-011
 created_at: 2026-04-07T21:04:07.648249+02:00
-updated_at: 2026-04-07T21:04:07.649423+02:00
+updated_at: 2026-04-07T22:07:51.725173+02:00
 title: 'BUG-008: Delete root duplicate files'
 description: git rm 14 root-level .sh files that are duplicates of lib/ counterparts. 5,154 lines of dead code.
-status: captured
+status: promoted
 tags:
     - area:code-quality
 parent: ROAD-001

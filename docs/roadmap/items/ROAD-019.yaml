@@ -1,0 +1,17 @@
+id: ROAD-019
+created_at: 2026-04-08T02:23:22.784282+02:00
+updated_at: 2026-04-08T02:23:37.314096+02:00
+title: 'Go Rewrite: Distribution & Release'
+description: Auto-update, Homebrew tap, install script, npm wrapper, shell completions, GitHub Actions CI.
+status: captured
+tags:
+    - phase:go
+    - area:go-distribution
+    - priority:medium
+refs:
+    - type: brainstorm
+      path: docs/brainstorming/2026-04-08-go-rewrite-design.md
+linked_issues:
+    - FEAT-004
+    - FEAT-005
+    - FEAT-006

@@ -1,0 +1,14 @@
+id: FEAT-003
+type: feature
+created_at: 2026-04-08T02:23:09.099427+02:00
+updated_at: 2026-04-08T02:23:37.102791+02:00
+source: local
+status: open
+origin:
+    roadmap_items:
+        - ROAD-017
+title: 'Go CLI: Multi-format output system (--json/--quiet/--no-color)'
+description: Output Writer interface with colored, JSON, quiet modes. Non-TTY auto-detection. Respects NO_COLOR env var. All modules use ctx.Output for consistent formatting. See design spec section 4.
+affected_files:
+    - internal/output/output.go
+    - internal/output/colors.go

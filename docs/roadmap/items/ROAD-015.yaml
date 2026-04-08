@@ -1,9 +1,9 @@
 id: ROAD-015
 created_at: 2026-04-07T21:04:07.802577+02:00
-updated_at: 2026-04-07T21:04:07.804977+02:00
+updated_at: 2026-04-07T22:07:51.880652+02:00
 title: Create project CLAUDE.md
 description: Project-specific instructions for Claude Code sessions covering architecture, testing, patterns, constraints.
-status: captured
+status: promoted
 tags:
     - area:docs
 parent: ROAD-001

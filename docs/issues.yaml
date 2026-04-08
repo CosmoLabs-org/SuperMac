@@ -1,11 +1,47 @@
 version: "1.0"
 project: SuperMac
-last_updated: 2026-04-07T17:57:44.904816+02:00
-next_bug_id: 9
-next_feat_id: 1
+last_updated: 2026-04-08T02:23:09.210752+02:00
+next_bug_id: 10
+next_feat_id: 7
 next_task_id: 1
 next_imp_id: 1
 issues:
+    - id: FEAT-006
+      type: feature
+      status: open
+      title: 'Go CLI: Multi-channel distribution'
+      created_at: 2026-04-08T02:23:09.210256+02:00
+    - id: FEAT-005
+      type: feature
+      status: open
+      title: 'Go CLI: Shell completions (bash/zsh/fish)'
+      created_at: 2026-04-08T02:23:09.17296+02:00
+    - id: FEAT-004
+      type: feature
+      status: open
+      title: 'Go CLI: Auto-update via GitHub Releases'
+      created_at: 2026-04-08T02:23:09.135885+02:00
+    - id: FEAT-003
+      type: feature
+      status: open
+      title: 'Go CLI: Multi-format output system (--json/--quiet/--no-color)'
+      created_at: 2026-04-08T02:23:09.099427+02:00
+    - id: FEAT-002
+      type: feature
+      status: open
+      title: 'Go CLI: Real config system with YAML'
+      created_at: 2026-04-08T02:23:09.065079+02:00
+    - id: FEAT-001
+      type: feature
+      status: open
+      title: 'Go CLI: Cobra module interface with auto-registration'
+      created_at: 2026-04-08T02:23:09.026111+02:00
+    - id: BUG-009
+      type: bug
+      status: open
+      title: bin/mac uses declare -A which requires Bash 4+ (macOS ships 3.2)
+      severity: high
+      created_at: 2026-04-07T22:07:00.668873+02:00
     - id: BUG-008
       type: bug
       status: open

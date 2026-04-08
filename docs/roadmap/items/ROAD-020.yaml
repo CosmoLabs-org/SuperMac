@@ -1,0 +1,10 @@
+id: ROAD-020
+created_at: 2026-04-08T02:23:22.821083+02:00
+updated_at: 2026-04-08T02:23:22.822709+02:00
+title: Desktop Application
+description: 'SwiftUI or Electron desktop app wrapping the Go CLI. Premium features: profiles, health dashboard, scheduling. Open-source CLI + paid desktop model.'
+status: captured
+tags:
+    - phase:desktop
+    - area:desktop
+    - priority:low

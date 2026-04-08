@@ -1,9 +1,9 @@
 id: ROAD-007
 created_at: 2026-04-07T21:03:54.911909+02:00
-updated_at: 2026-04-07T21:03:54.913308+02:00
+updated_at: 2026-04-07T22:07:51.457809+02:00
 title: 'BUG-003: Apple Silicon page size'
 description: 'Replace hardcoded page_size=4096 with sysctl -n hw.pagesize. File: lib/system.sh'
-status: captured
+status: promoted
 tags:
     - area:system
     - area:apple-silicon

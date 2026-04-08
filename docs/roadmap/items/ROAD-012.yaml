@@ -1,9 +1,9 @@
 id: ROAD-012
 created_at: 2026-04-07T21:04:07.689457+02:00
-updated_at: 2026-04-07T21:04:07.690899+02:00
+updated_at: 2026-04-07T22:07:51.764407+02:00
 title: Fix version mismatch (2.1.0 → 0.1.1)
 description: Sync lib/utils.sh and config/config.json version from 2.1.0 to 0.1.1 to match version registry.
-status: captured
+status: promoted
 tags:
     - area:versioning
 parent: ROAD-001

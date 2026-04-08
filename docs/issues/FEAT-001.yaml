@@ -1,0 +1,14 @@
+id: FEAT-001
+type: feature
+created_at: 2026-04-08T02:23:09.026111+02:00
+updated_at: 2026-04-08T02:23:37.027706+02:00
+source: local
+status: open
+origin:
+    roadmap_items:
+        - ROAD-017
+title: 'Go CLI: Cobra module interface with auto-registration'
+description: Implement the Module interface and Registry from the Go rewrite design. Each module implements Name(), ShortDescription(), Commands(). Registry auto-discovers modules via init() blank imports. Replaces the hardcoded CATEGORIES map from Bash version.
+affected_files:
+    - internal/module/module.go
+    - internal/module/registry.go

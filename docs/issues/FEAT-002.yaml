@@ -1,0 +1,13 @@
+id: FEAT-002
+type: feature
+created_at: 2026-04-08T02:23:09.065079+02:00
+updated_at: 2026-04-08T02:23:37.066424+02:00
+source: local
+status: open
+origin:
+    roadmap_items:
+        - ROAD-017
+title: 'Go CLI: Real config system with YAML'
+description: Replace decorative config.json with a working YAML config system. First-run creates ~/.supermac/config.yaml with defaults. Modules read their section. CLI flags override config. mac config edit/get/set commands. See design spec section 3.
+affected_files:
+    - internal/config/config.go

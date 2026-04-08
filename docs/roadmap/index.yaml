@@ -1,61 +1,90 @@
 version: "1.0"
 project: SuperMac
-last_updated: 2026-04-07T21:04:15.974636+02:00
-next_id: 16
+last_updated: 2026-04-08T02:23:37.314848+02:00
+next_id: 21
 items:
+    - id: ROAD-020
+      title: Desktop Application
+      status: captured
+      created_at: 2026-04-08T02:23:22.821083+02:00
+    - id: ROAD-019
+      title: 'Go Rewrite: Distribution & Release'
+      status: captured
+      linked_issues:
+        - FEAT-004
+        - FEAT-005
+        - FEAT-006
+      created_at: 2026-04-08T02:23:22.784282+02:00
+    - id: ROAD-018
+      title: 'Go Rewrite: Module Port'
+      status: captured
+      created_at: 2026-04-08T02:23:22.749367+02:00
+    - id: ROAD-017
+      title: 'Go Rewrite: Foundation'
+      status: captured
+      linked_issues:
+        - FEAT-001
+        - FEAT-002
+        - FEAT-003
+      created_at: 2026-04-08T02:23:22.706815+02:00
+    - id: ROAD-016
+      title: 'BUG-009: Bash 3.2 declare -A incompatibility'
+      status: captured
+      parent: ROAD-001
+      created_at: 2026-04-07T22:07:28.490539+02:00
     - id: ROAD-015
       title: Create project CLAUDE.md
-      status: captured
+      status: promoted
       parent: ROAD-001
       created_at: 2026-04-07T21:04:07.802577+02:00
     - id: ROAD-014
       title: Fix .gitignore
-      status: captured
+      status: promoted
       parent: ROAD-001
       created_at: 2026-04-07T21:04:07.757061+02:00
     - id: ROAD-013
       title: Create LICENSE file
-      status: captured
+      status: promoted
       parent: ROAD-001
       created_at: 2026-04-07T21:04:07.722345+02:00
     - id: ROAD-012
       title: Fix version mismatch (2.1.0 → 0.1.1)
-      status: captured
+      status: promoted
       parent: ROAD-001
       created_at: 2026-04-07T21:04:07.689457+02:00
     - id: ROAD-011
       title: 'BUG-008: Delete root duplicate files'
-      status: captured
+      status: promoted
       parent: ROAD-001
       created_at: 2026-04-07T21:04:07.648249+02:00
     - id: ROAD-010
       title: 'BUG-006: dev.sh decimal comparison'
-      status: captured
+      status: promoted
       parent: ROAD-001
       created_at: 2026-04-07T21:04:07.615423+02:00
     - id: ROAD-009
       title: 'BUG-005: dock.sh string concatenation'
-      status: captured
+      status: promoted
       parent: ROAD-001
       created_at: 2026-04-07T21:04:07.580927+02:00
     - id: ROAD-008
       title: 'BUG-004: Missing install modules'
-      status: captured
+      status: promoted
       parent: ROAD-001
       created_at: 2026-04-07T21:03:54.946661+02:00
     - id: ROAD-007
       title: 'BUG-003: Apple Silicon page size'
-      status: captured
+      status: promoted
       parent: ROAD-001
       created_at: 2026-04-07T21:03:54.911909+02:00
     - id: ROAD-006
       title: 'BUG-002: Full airport binary path'
-      status: captured
+      status: promoted
       parent: ROAD-001
       created_at: 2026-04-07T21:03:54.875531+02:00
     - id: ROAD-005
       title: 'BUG-001: Targeted /tmp cleanup'
-      status: captured
+      status: promoted
       parent: ROAD-001
       created_at: 2026-04-07T21:03:54.837017+02:00
     - id: ROAD-004
