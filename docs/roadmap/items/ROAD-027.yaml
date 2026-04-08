@@ -1,0 +1,9 @@
+id: ROAD-027
+created_at: 2026-04-08T02:31:29.194523+02:00
+updated_at: 2026-04-08T02:31:29.196092+02:00
+title: Port wifi module (on/off/toggle/status/scan/connect)
+description: 507 lines. Uses airport binary at known path. Already fixed in BUG-002.
+status: captured
+tags:
+    - area:go-module-wifi
+parent: ROAD-018

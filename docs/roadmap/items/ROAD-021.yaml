@@ -1,0 +1,11 @@
+id: ROAD-021
+created_at: 2026-04-08T02:30:56.847021+02:00
+updated_at: 2026-04-08T02:31:28.971464+02:00
+title: Scaffold Go project with Cobra
+description: go mod init, add cobra/yaml/semver deps, create cmd/mac/main.go with root command and version subcommand. Wire up Cobra with persistent flags (--json, --quiet, --no-color, --debug). Makefile with build/test/lint targets.
+status: captured
+priority: 99
+effort: small
+tags:
+    - area:go-scaffold
+parent: ROAD-017

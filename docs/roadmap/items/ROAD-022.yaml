@@ -1,0 +1,11 @@
+id: ROAD-022
+created_at: 2026-04-08T02:30:56.884462+02:00
+updated_at: 2026-04-08T02:31:29.015162+02:00
+title: Module interface and registry
+description: Define Module interface (Name, ShortDescription, Commands). Create registry with auto-discovery via init() blank imports. FEAT-001.
+status: captured
+priority: 98
+effort: medium
+tags:
+    - area:go-interface
+parent: ROAD-017

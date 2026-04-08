@@ -1,9 +1,24 @@
 id: ROAD-004
 created_at: 2026-04-07T21:03:43.240749+02:00
-updated_at: 2026-04-07T21:03:43.24115+02:00
+updated_at: 2026-04-08T02:30:36.15272+02:00
 title: 'Phase 3: Growth'
-description: 'Homebrew formula, GitHub Actions CI/CD, auto-update, plugin system, performance optimization, IPv6, accessibility. Target: 1-2 weeks.'
+description: |-
+    Growth phase. Mostly superseded by Go rewrite roadmap (ROAD-017/018/019). Keeping for reference.
+
+    Original deliverables:
+    1. Homebrew formula (now covered by ROAD-019)
+    2. GitHub Actions CI/CD (now covered by ROAD-019)
+    3. Auto-update mechanism (now covered by ROAD-019 and FEAT-004)
+    4. Plugin/module system (Go rewrite handles this via Module interface)
+    5. Performance optimization (Go is inherently faster than Bash)
+    6. IPv6 support (can add to Go network module)
+    7. Accessibility improvements (Go CLI with Bubble Tea later)
+
+    Recommendation: Close this item. All deliverables are now covered by Go rewrite roadmap items with better architecture.
+    Estimated effort: N/A — superseded by Go rewrite
 status: captured
+priority: 10
+effort: medium
 tags:
     - phase:3
     - priority:low

@@ -1,0 +1,11 @@
+id: ROAD-024
+created_at: 2026-04-08T02:30:56.956871+02:00
+updated_at: 2026-04-08T02:31:29.085741+02:00
+title: Config system implementation
+description: YAML config loader, first-run defaults, mac config edit/get/set commands. FEAT-002.
+status: captured
+priority: 96
+effort: medium
+tags:
+    - area:go-config
+parent: ROAD-017

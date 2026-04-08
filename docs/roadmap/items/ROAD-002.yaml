@@ -1,9 +1,23 @@
 id: ROAD-002
 created_at: 2026-04-07T21:03:27.194193+02:00
-updated_at: 2026-04-07T21:03:27.194728+02:00
+updated_at: 2026-04-08T02:29:59.061736+02:00
 title: 'Phase 1: Foundation'
-description: 'Build quality foundation: shellcheck, expanded tests, single-source version, config decision, NO_COLOR support. Target: 3-5 days.'
+description: |-
+    Build quality foundation for the Bash version while Go rewrite is being planned.
+
+    Deliverables:
+    1. Make config.json functional or remove it entirely — currently decorative, get_config() never called
+    2. Add shellcheck to CI — .shellcheckrc, fix all SC warnings, add to Makefile check target
+    3. Expand test suite from 7.8% to 50% command coverage — add dock, audio, screenshot tests
+    4. Single-source version string — one definition, read everywhere
+    5. Fix .gitignore (DONE in Phase 0)
+    6. Add NO_COLOR support — check NO_COLOR env var, add --no-color flag
+
+    Priority decision: If Go rewrite starts soon, some of these (shellcheck, config decision) may not be worth the effort. The Go rewrite makes them obsolete. Recommend: only do items that improve the Bash version's stability while Go is being built.
+    Estimated effort: Medium (3-5 days)
 status: captured
+priority: 40
+effort: medium
 tags:
     - phase:1
     - priority:high

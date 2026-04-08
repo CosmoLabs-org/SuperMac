@@ -1,0 +1,9 @@
+id: ROAD-030
+created_at: 2026-04-08T02:31:29.309848+02:00
+updated_at: 2026-04-08T02:31:29.312128+02:00
+title: Port dev module (kill-port, servers, processes, UUID)
+description: 610 lines. Most lines of any module. lsof for port management, ps for process monitoring.
+status: captured
+tags:
+    - area:go-module-dev
+parent: ROAD-018

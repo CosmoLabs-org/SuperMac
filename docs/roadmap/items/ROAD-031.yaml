@@ -1,0 +1,9 @@
+id: ROAD-031
+created_at: 2026-04-08T02:31:29.349959+02:00
+updated_at: 2026-04-08T02:31:29.35219+02:00
+title: Port remaining modules (dock, finder, audio, screenshot)
+description: dock (573 lines), finder (313 lines), audio (519 lines), screenshot (590 lines). All primarily use defaults write/read. Can be ported in parallel.
+status: captured
+tags:
+    - area:go-modules-rest
+parent: ROAD-018

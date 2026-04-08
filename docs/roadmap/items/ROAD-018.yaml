@@ -1,13 +1,40 @@
 id: ROAD-018
 created_at: 2026-04-08T02:23:22.749367+02:00
-updated_at: 2026-04-08T02:23:22.751353+02:00
+updated_at: 2026-04-08T02:28:55.084699+02:00
 title: 'Go Rewrite: Module Port'
-description: Port all 10 Bash modules to Go (wifi, system, network, display, dock, finder, dev, audio, screenshot). 1:1 feature parity.
-status: captured
+description: |-
+    Port all 10 Bash modules from lib/*.sh to Go packages in internal/modules/. Each module implements the Module interface from ROAD-017. 1:1 feature parity — same commands, same behavior, same output.
+
+    Module port order (by complexity and risk):
+    1. system (541 lines) — Info, cleanup, battery, memory, CPU. Critical to get right (cleanup is destructive)
+    2. wifi (507 lines) — On/off/toggle/status/scan/connect/forget. Uses airport binary
+    3. network (484 lines) — IP, DNS flush, connectivity. Uses sudo for some operations
+    4. display (428 lines) — Brightness, dark mode, Night Shift, True Tone. Heavy osascript
+    5. dev (610 lines) — kill-port, servers, processes, UUID. Most complex module
+    6. dock (573 lines) — Position, autohide, size, magnification. All defaults write
+    7. finder (313 lines) — File visibility, Finder restart. Simplest module
+    8. audio (519 lines) — Volume, mute, devices. osascript-heavy
+    9. screenshot (590 lines) — Location, format, shadow, cursor. All defaults write
+
+    Each module port includes:
+    - internal/modules/<name>/<name>.go: Implementation
+    - internal/modules/<name>/<name>_test.go: Unit tests with platform mocks
+    - Command registration via init()
+    - Error handling with user-friendly messages
+    - --json output support via ctx.Output
+
+    Platform abstraction: Each module calls internal/platform/ functions (not raw exec.Command). This is the test seam — platform calls can be mocked.
+
+    Estimated effort: Large (5-8 days, highly parallelizable — each module is independent)
+status: planned
+priority: 90
+effort: large
 tags:
     - phase:go
     - area:go-modules
     - priority:high
+depends_on:
+    - ROAD-017
 refs:
     - type: brainstorm
       path: docs/brainstorming/2026-04-08-go-rewrite-design.md

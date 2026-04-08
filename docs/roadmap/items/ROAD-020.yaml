@@ -1,10 +1,44 @@
 id: ROAD-020
 created_at: 2026-04-08T02:23:22.821083+02:00
-updated_at: 2026-04-08T02:23:22.822709+02:00
+updated_at: 2026-04-08T02:29:41.548099+02:00
 title: Desktop Application
-description: 'SwiftUI or Electron desktop app wrapping the Go CLI. Premium features: profiles, health dashboard, scheduling. Open-source CLI + paid desktop model.'
+description: |-
+    Desktop application wrapping the Go CLI. Open-source CLI + paid desktop app model.
+
+    Architecture: Desktop app calls the Go CLI binary under the hood (or links to pkg/supermac library directly). CLI is the engine, desktop is the premium interface.
+
+    Potential frameworks:
+    - SwiftUI (native macOS feel, best performance)
+    - Electron/Tauri (web tech, cross-platform potential later)
+    - Recommend: SwiftUI for native experience, defer cross-platform
+
+    Premium features (paid desktop app):
+    - System health dashboard (real-time CPU, memory, disk, battery)
+    - One-click maintenance scheduling (weekly cleanup, etc.)
+    - Profiles/presets (work, gaming, battery saver)
+    - Automation workflows (if battery < 20%: turn off wifi, dim display, etc.)
+    - Network monitoring with alerts
+    - Screenshot organizer with tagging
+    - Custom keyboard shortcuts for any mac command
+
+    Free features (open-source CLI parity):
+    - All CLI commands accessible from desktop UI
+    - Basic system info view
+    - Config editor
+
+    Business model:
+    - CLI: Free, open-source, MIT license (github.com/cosmolabs-org/supermac)
+    - Desktop: Freemium — basic UI free, premium features subscription (.99/mo or .99/yr)
+    - Both powered by same Go engine — no feature fragmentation
+
+    Prerequisites: Go CLI rewrite complete and stable (ROAD-017, ROAD-018, ROAD-019)
+    Estimated effort: Extra large (2-4 weeks)
 status: captured
+priority: 30
+effort: large
 tags:
     - phase:desktop
     - area:desktop
     - priority:low
+depends_on:
+    - ROAD-019

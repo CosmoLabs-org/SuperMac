@@ -1,13 +1,30 @@
 id: ROAD-003
 created_at: 2026-04-07T21:03:35.779468+02:00
-updated_at: 2026-04-07T21:03:35.780007+02:00
+updated_at: 2026-04-08T02:30:14.707666+02:00
 title: 'Phase 2: Quality'
-description: 'Split utils.sh god file, module auto-discovery, --yes flag, boolean parsing, install verification, uninstall improvements, docs accuracy. Target: 1 week.'
+description: |-
+    Quality improvements for Bash version. Most of this will be superseded by the Go rewrite.
+
+    Deliverables:
+    1. Split utils.sh god file (589 lines, 8 responsibilities) into focused files: colors.sh, output.sh, validation.sh, interaction.sh, loader.sh
+    2. Add module auto-discovery — replace hardcoded CATEGORIES with runtime scan of lib/*.sh
+    3. Add --yes flag for non-interactive use (bypass confirm() prompts)
+    4. Consolidate boolean parsing — shared parse_boolean() in utils.sh
+    5. Add install integrity verification (SHA256 checksums for downloads)
+    6. Improve uninstall (confirmation prompt, config backup, PATH cleanup)
+    7. Fix documentation accuracy (remove non-existent commands from README)
+
+    NOTE: If Go rewrite is actively being built, most of Phase 2 is not worth doing in Bash. The Go rewrite solves all of these by design (module interface, Cobra flags, single binary, proper testing). Recommend: skip unless Bash version needs long-term maintenance.
+    Estimated effort: Large (1 week)
 status: captured
+priority: 20
+effort: large
 tags:
     - phase:2
     - priority:medium
     - area:architecture
+depends_on:
+    - ROAD-002
 refs:
     - type: plan
       path: docs/audit/latest/upgrade-plan.md
