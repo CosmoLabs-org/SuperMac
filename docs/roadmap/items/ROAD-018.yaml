@@ -26,7 +26,7 @@ description: |-
     Platform abstraction: Each module calls internal/platform/ functions (not raw exec.Command). This is the test seam — platform calls can be mocked.
 
     Estimated effort: Large (5-8 days, highly parallelizable — each module is independent)
-status: planned
+status: completed
 priority: 90
 effort: large
 tags:
