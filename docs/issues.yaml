@@ -1,96 +1,11 @@
 version: "1.0"
 project: SuperMac
-last_updated: 2026-04-08T02:23:09.210752+02:00
+last_updated: 2026-04-08T04:24:18.408958+02:00
 next_bug_id: 10
 next_feat_id: 7
 next_task_id: 1
 next_imp_id: 1
 issues:
-    - id: FEAT-006
-      type: feature
-      status: open
-      title: 'Go CLI: Multi-channel distribution'
-      created_at: 2026-04-08T02:23:09.210256+02:00
-    - id: FEAT-005
-      type: feature
-      status: open
-      title: 'Go CLI: Shell completions (bash/zsh/fish)'
-      created_at: 2026-04-08T02:23:09.17296+02:00
-    - id: FEAT-004
-      type: feature
-      status: open
-      title: 'Go CLI: Auto-update via GitHub Releases'
-      created_at: 2026-04-08T02:23:09.135885+02:00
-    - id: FEAT-003
-      type: feature
-      status: open
-      title: 'Go CLI: Multi-format output system (--json/--quiet/--no-color)'
-      created_at: 2026-04-08T02:23:09.099427+02:00
-    - id: FEAT-002
-      type: feature
-      status: open
-      title: 'Go CLI: Real config system with YAML'
-      created_at: 2026-04-08T02:23:09.065079+02:00
-    - id: FEAT-001
-      type: feature
-      status: open
-      title: 'Go CLI: Cobra module interface with auto-registration'
-      created_at: 2026-04-08T02:23:09.026111+02:00
-    - id: BUG-009
-      type: bug
-      status: open
-      title: bin/mac uses declare -A which requires Bash 4+ (macOS ships 3.2)
-      severity: high
-      created_at: 2026-04-07T22:07:00.668873+02:00
-    - id: BUG-008
-      type: bug
-      status: open
-      title: 5154 lines of duplicate files at project root
-      severity: high
-      area: infra
-      created_at: 2026-04-07T17:57:44.904555+02:00
-    - id: BUG-007
-      type: bug
-      status: open
-      title: config.json is dead code never read at runtime
-      severity: high
-      area: ux
-      created_at: 2026-04-07T17:57:44.781954+02:00
-    - id: BUG-006
-      type: bug
-      status: open
-      title: dev.sh CPU comparison uses string ordering broken for values >= 10%
-      severity: high
-      area: reliability
-      created_at: 2026-04-07T17:57:44.680302+02:00
-    - id: BUG-005
-      type: bug
-      status: open
-      title: dock.sh string concatenation parse error at line 131
-      severity: high
-      area: reliability
-      created_at: 2026-04-07T17:57:44.563688+02:00
-    - id: BUG-004
-      type: bug
-      status: open
-      title: Installer missing 4 of 9 library modules
-      severity: critical
-      area: reliability
-      created_at: 2026-04-07T17:57:44.437507+02:00
-    - id: BUG-003
-      type: bug
-      status: open
-      title: Wrong memory statistics on Apple Silicon (page size hardcoded 4096)
-      severity: critical
-      area: reliability
-      created_at: 2026-04-07T17:57:44.332315+02:00
-    - id: BUG-002
-      type: bug
-      status: open
-      title: Airport binary never found - WiFi features silently degraded
-      severity: critical
-      area: reliability
-      created_at: 2026-04-07T17:57:44.23531+02:00
     - id: BUG-001
       type: bug
       status: open
@@ -98,3 +13,88 @@ issues:
       severity: critical
       area: reliability
       created_at: 2026-04-07T17:56:58.403942+02:00
+    - id: BUG-002
+      type: bug
+      status: open
+      title: Airport binary never found - WiFi features silently degraded
+      severity: critical
+      area: reliability
+      created_at: 2026-04-07T17:57:44.23531+02:00
+    - id: BUG-003
+      type: bug
+      status: open
+      title: Wrong memory statistics on Apple Silicon (page size hardcoded 4096)
+      severity: critical
+      area: reliability
+      created_at: 2026-04-07T17:57:44.332315+02:00
+    - id: BUG-004
+      type: bug
+      status: open
+      title: Installer missing 4 of 9 library modules
+      severity: critical
+      area: reliability
+      created_at: 2026-04-07T17:57:44.437507+02:00
+    - id: BUG-005
+      type: bug
+      status: open
+      title: dock.sh string concatenation parse error at line 131
+      severity: high
+      area: reliability
+      created_at: 2026-04-07T17:57:44.563688+02:00
+    - id: BUG-006
+      type: bug
+      status: open
+      title: dev.sh CPU comparison uses string ordering broken for values >= 10%
+      severity: high
+      area: reliability
+      created_at: 2026-04-07T17:57:44.680302+02:00
+    - id: BUG-007
+      type: bug
+      status: open
+      title: config.json is dead code never read at runtime
+      severity: high
+      area: ux
+      created_at: 2026-04-07T17:57:44.781954+02:00
+    - id: BUG-008
+      type: bug
+      status: open
+      title: 5154 lines of duplicate files at project root
+      severity: high
+      area: infra
+      created_at: 2026-04-07T17:57:44.904555+02:00
+    - id: BUG-009
+      type: bug
+      status: open
+      title: bin/mac uses declare -A which requires Bash 4+ (macOS ships 3.2)
+      severity: high
+      created_at: 2026-04-07T22:07:00.668873+02:00
+    - id: FEAT-001
+      type: feature
+      status: open
+      title: 'Go CLI: Cobra module interface with auto-registration'
+      created_at: 2026-04-08T02:23:09.026111+02:00
+    - id: FEAT-002
+      type: feature
+      status: open
+      title: 'Go CLI: Real config system with YAML'
+      created_at: 2026-04-08T02:23:09.065079+02:00
+    - id: FEAT-003
+      type: feature
+      status: open
+      title: 'Go CLI: Multi-format output system (--json/--quiet/--no-color)'
+      created_at: 2026-04-08T02:23:09.099427+02:00
+    - id: FEAT-004
+      type: feature
+      status: open
+      title: 'Go CLI: Auto-update via GitHub Releases'
+      created_at: 2026-04-08T02:23:09.135885+02:00
+    - id: FEAT-005
+      type: feature
+      status: open
+      title: 'Go CLI: Shell completions (bash/zsh/fish)'
+      created_at: 2026-04-08T02:23:09.17296+02:00
+    - id: FEAT-006
+      type: feature
+      status: open
+      title: 'Go CLI: Multi-channel distribution'
+      created_at: 2026-04-08T02:23:09.210256+02:00

@@ -1,9 +1,10 @@
 {
-  "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "hash": "f5322ad23649afe11dd4be38c87e98f3b2793fb2c3d04a092d20efb82a5bfdca",
   "project_name": "SuperMac",
   "language": "unknown",
   "framework": "",
   "directories": [
+    "GOrchestra",
     "bin",
     "config",
     "docs",
@@ -14,5 +15,5 @@
   "dependencies": null,
   "has_tests": true,
   "has_ci": false,
-  "generated_at": "2026-04-07T15:12:25.556861+02:00"
+  "generated_at": "2026-04-07T21:29:56.926948+02:00"
 }

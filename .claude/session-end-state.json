@@ -1,16 +1,7 @@
 {
-  "session_date": "2026-04-07",
-  "mode": "quick",
-  "started_at": "2026-04-07T16:12:48Z",
-  "phases": {
-    "3": {
-      "status": "completed",
-      "at": "2026-04-07T16:15:48Z"
-    },
-    "6": {
-      "status": "completed",
-      "at": "2026-04-07T16:18:00Z"
-    }
-  },
+  "session_date": "2026-04-08",
+  "mode": "continue",
+  "started_at": "2026-04-08T02:24:18Z",
+  "phases": {},
   "verified": false
 }
