@@ -87,6 +87,11 @@ func (n *NetworkModule) Commands() []module.Command {
 			Aliases:     []string{"loc"},
 			Run:         n.locations,
 		},
+		{
+			Name:        "connections",
+			Description: "Show all active network connections",
+			Run:         n.connections,
+		},
 	}
 }
 
@@ -516,5 +521,104 @@ func (n *NetworkModule) locations(ctx *module.Context) error {
 
 	fmt.Println()
 	ctx.Output.Info("Switch with: sudo networksetup -switchtolocation <name>")
+	return nil
+}
+
+func (n *NetworkModule) connections(ctx *module.Context) error {
+	ctx.Output.Header("Active Network Connections")
+
+	out, err := exec.Command("lsof", "-i", "-n", "-P").Output()
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to list connections: %v", err))
+	}
+
+	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+	if len(lines) <= 1 {
+		ctx.Output.Info("No active network connections found")
+		return nil
+	}
+
+	fmt.Println()
+	fmt.Printf("  %-20s %-8s %-10s %-6s %-24s %-24s %s\n",
+		"PROCESS", "PID", "USER", "PROTO", "LOCAL", "FOREIGN", "STATE")
+	fmt.Println(strings.Repeat(" ", 2) + strings.Repeat("-", 110))
+
+	for _, line := range lines[1:] { // skip header
+		fields := strings.Fields(line)
+		if len(fields) < 9 {
+			continue
+		}
+
+		process := fields[0]
+		pid := fields[1]
+		user := fields[2]
+		// fields[3] is "fd", fields[4] may be the protocol descriptor
+		// The node field (local addr) and name field (foreign addr) positions vary
+		// lsof -i -n -P output: COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME
+		// We need to find the connection info after NODE
+
+		// Find the protocol and addresses from the end of the line
+		// Re-join everything from field 8 onwards (NAME column and state)
+		rest := strings.Join(fields[8:], " ")
+
+		// Parse: (TCPUDP) (local->foreign) (state)
+		// or: (TCPUDP) (local->foreign)
+		var proto, localAddr, foreignAddr, state string
+
+		// Extract protocol from the TYPE field area - look at fields[4]
+		nodeType := ""
+		if len(fields) > 4 {
+			nodeType = fields[4]
+		}
+		if strings.HasPrefix(nodeType, "IPv") {
+			// Look for TCP/UDP in the name portion
+			// The name field contains: protocol local->foreign (state)
+			parts := strings.SplitN(rest, " ", 2)
+			if len(parts) >= 1 {
+				connInfo := parts[0]
+				stateParts := ""
+				if len(parts) >= 2 {
+					stateParts = parts[1]
+				}
+
+				// Parse local->foreign
+				connParts := strings.SplitN(connInfo, "->", 2)
+				if len(connParts) == 2 {
+					localAddr = connParts[0]
+					foreignAddr = connParts[1]
+				} else {
+					localAddr = connInfo
+				}
+
+				// Determine protocol from the * in FD or from connection type
+				if strings.Contains(fields[3], "u") || strings.Contains(rest, "UDP") {
+					proto = "UDP"
+				} else {
+					proto = "TCP"
+				}
+
+				// Extract state from parentheses
+				if stateParts != "" {
+					state = strings.Trim(stateParts, "()")
+				}
+				if state == "" && proto == "UDP" {
+					state = "-"
+				}
+			}
+		}
+
+		if localAddr == "" {
+			continue
+		}
+
+		// Truncate long process names
+		if len(process) > 20 {
+			process = process[:17] + "..."
+		}
+
+		fmt.Printf("  %-20s %-8s %-10s %-6s %-24s %-24s %s\n",
+			process, pid, user, proto, localAddr, foreignAddr, state)
+	}
+
 	return nil
 }

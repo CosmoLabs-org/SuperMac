@@ -75,6 +75,16 @@ func (s *SystemModule) Commands() []module.Command {
 			Description: "System uptime with details",
 			Run:         s.uptime,
 		},
+		{
+			Name:        "updates",
+			Description: "Check for available macOS software updates",
+			Run:         s.updates,
+		},
+		{
+			Name:        "temperature",
+			Description: "Show CPU temperature",
+			Run:         s.temperature,
+		},
 	}
 }
 
@@ -494,6 +504,80 @@ func (s *SystemModule) uptime(ctx *module.Context) error {
 		}
 	}
 
+	return nil
+}
+
+// ============================================================================
+// Updates
+// ============================================================================
+
+func (s *SystemModule) updates(ctx *module.Context) error {
+	ctx.Output.Header("Software Updates")
+	ctx.Output.Info("Checking for available updates...")
+	fmt.Println()
+
+	out, err := exec.Command("softwareupdate", "--list").CombinedOutput()
+	output := strings.TrimSpace(string(out))
+
+	if err != nil {
+		// softwareupdate returns non-zero when no updates found
+		if strings.Contains(output, "No new software available") || strings.Contains(output, "no updates") {
+			ctx.Output.Success("No updates available")
+			return nil
+		}
+		// Could be a permissions or other issue
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to check for updates: %s", output))
+	}
+
+	if output == "" || strings.Contains(output, "No new software available") {
+		ctx.Output.Success("No updates available")
+		return nil
+	}
+
+	fmt.Println(output)
+	ctx.Output.Info("To install updates: sudo softwareupdate --install --all")
+	return nil
+}
+
+// ============================================================================
+// Temperature
+// ============================================================================
+
+func (s *SystemModule) temperature(ctx *module.Context) error {
+	ctx.Output.Header("CPU Temperature")
+
+	// Try sudo powermetrics first
+	out, err := exec.Command("sudo", "-n", "powermetrics", "--samplers", "smc", "-i", "1", "-n", "1").CombinedOutput()
+	if err == nil {
+		// Parse die temperature from powermetrics output
+		for _, line := range strings.Split(string(out), "\n") {
+			if strings.Contains(line, "die temperature") {
+				// Extract temperature value
+				parts := strings.Split(line, ":")
+				if len(parts) >= 2 {
+					temp := strings.TrimSpace(parts[1])
+					fmt.Printf("  CPU Die Temperature: %s\n", temp)
+					return nil
+				}
+			}
+		}
+	}
+
+	// Try osascript with administrator privileges
+	out, err = exec.Command("osascript", "-e",
+		`do shell script "powermetrics --samplers smc -i 1 -n 1 2>/dev/null | grep 'die temperature'" as administrator`).CombinedOutput()
+	if err == nil && len(out) > 0 {
+		line := strings.TrimSpace(string(out))
+		parts := strings.Split(line, ":")
+		if len(parts) >= 2 {
+			fmt.Printf("  CPU Die Temperature: %s\n", strings.TrimSpace(parts[1]))
+			return nil
+		}
+	}
+
+	ctx.Output.Warning("Unable to read CPU temperature")
+	ctx.Output.Info("This command requires sudo privileges")
+	ctx.Output.Info("Run: sudo mac system temperature")
 	return nil
 }
 

@@ -22,6 +22,8 @@ import (
 	_ "github.com/cosmolabs-org/supermac/internal/modules/dev"
 	_ "github.com/cosmolabs-org/supermac/internal/modules/audio"
 	_ "github.com/cosmolabs-org/supermac/internal/modules/screenshot"
+	_ "github.com/cosmolabs-org/supermac/internal/modules/bluetooth"
+	_ "github.com/cosmolabs-org/supermac/internal/modules/apps"
 
 	"github.com/spf13/cobra"
 )

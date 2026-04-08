@@ -1,9 +1,16 @@
 package dev
 
 import (
+	"crypto/md5"
 	"crypto/rand"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
+	"hash"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -11,6 +18,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
@@ -133,6 +141,23 @@ func (d *DevModule) Commands() []module.Command {
 				{Name: "length", Required: false, Description: "Password length (default: 20)"},
 			},
 			Run: d.password,
+		},
+		{
+			Name:        "hash",
+			Description: "Compute file hash (default: sha256)",
+			Args: []module.Arg{
+				{Name: "file", Required: true, Description: "File to hash"},
+				{Name: "algorithm", Required: false, Description: "Algorithm: md5, sha1, sha256 (default), sha512"},
+			},
+			Run: d.hashFile,
+		},
+		{
+			Name:        "timestamp",
+			Description: "Convert between unix timestamps and human dates",
+			Args: []module.Arg{
+				{Name: "value", Required: false, Description: "Unix timestamp or date string (default: now)"},
+			},
+			Run: d.timestamp,
 		},
 	}
 }
@@ -803,6 +828,144 @@ func (d *DevModule) base64Decode(ctx *module.Context) error {
 
 	ctx.Output.Success("Copied to clipboard")
 	return nil
+}
+
+// --- Hash ---
+
+func (d *DevModule) hashFile(ctx *module.Context) error {
+	if len(ctx.Args) == 0 {
+		return module.NewExitError(module.ExitUsage, "File required: mac dev hash <file> [algorithm]")
+	}
+
+	filePath := ctx.Args[0]
+	if _, err := os.Stat(filePath); err != nil {
+		return module.NewExitError(module.ExitNotFound, fmt.Sprintf("File not found: %s", filePath))
+	}
+
+	algorithm := "sha256"
+	if len(ctx.Args) > 1 {
+		algorithm = strings.ToLower(ctx.Args[1])
+	}
+
+	var h hash.Hash
+	switch algorithm {
+	case "md5":
+		h = md5.New()
+	case "sha1":
+		h = sha1.New()
+	case "sha256":
+		h = sha256.New()
+	case "sha512":
+		h = sha512.New()
+	default:
+		return module.NewExitError(module.ExitUsage,
+			fmt.Sprintf("Unknown algorithm: %s (valid: md5, sha1, sha256, sha512)", algorithm))
+	}
+
+	f, err := os.Open(filePath)
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to open file: %v", err))
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(h, f); err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to read file: %v", err))
+	}
+
+	checksum := hex.EncodeToString(h.Sum(nil))
+
+	fmt.Printf("%s  %s\n", checksum, filePath)
+	ctx.Output.Info("Algorithm: %s", strings.ToUpper(algorithm))
+
+	// Copy to clipboard
+	pbcopy := exec.Command("pbcopy")
+	pbcopy.Stdin = strings.NewReader(checksum)
+	_ = pbcopy.Run()
+
+	ctx.Output.Success("Hash copied to clipboard")
+	return nil
+}
+
+// --- Timestamp ---
+
+func (d *DevModule) timestamp(ctx *module.Context) error {
+	now := time.Now()
+
+	if len(ctx.Args) == 0 {
+		// No args: show current unix timestamp
+		fmt.Printf("  Unix timestamp: %d\n", now.Unix())
+		fmt.Printf("  UTC:            %s\n", now.UTC().Format(time.RFC3339))
+		fmt.Printf("  Local:          %s\n", now.Format("Mon Jan 2 15:04:05 MST 2006"))
+		return nil
+	}
+
+	input := ctx.Args[0]
+
+	// Try parsing as unix timestamp (integer)
+	if ts, err := strconv.ParseInt(input, 10, 64); err == nil {
+		t := time.Unix(ts, 0)
+		fmt.Printf("  Unix timestamp: %d\n", ts)
+		fmt.Printf("  UTC:            %s\n", t.UTC().Format(time.RFC3339))
+		fmt.Printf("  Local:          %s\n", t.Format("Mon Jan 2 15:04:05 MST 2006"))
+		fmt.Printf("  Relative:       %s\n", formatRelativeTime(now.Sub(t)))
+		return nil
+	}
+
+	// Try parsing as a date string
+	formats := []string{
+		"2006-01-02",
+		"2006-01-02 15:04:05",
+		time.RFC3339,
+		"Jan 2, 2006",
+		"January 2, 2006",
+		"01/02/2006",
+		"01/02/2006 15:04:05",
+	}
+
+	var parsed time.Time
+	for _, layout := range formats {
+		if t, err := time.Parse(layout, input); err == nil {
+			parsed = t
+			break
+		}
+	}
+
+	if parsed.IsZero() {
+		return module.NewExitError(module.ExitUsage,
+			fmt.Sprintf("Cannot parse '%s' as timestamp or date. Try formats like: 1700000000, 2024-01-15, 'Jan 15, 2024'", input))
+	}
+
+	fmt.Printf("  Date:           %s\n", parsed.Format("Mon Jan 2 15:04:05 MST 2006"))
+	fmt.Printf("  Unix timestamp: %d\n", parsed.Unix())
+	fmt.Printf("  UTC:            %s\n", parsed.UTC().Format(time.RFC3339))
+
+	// Copy unix timestamp to clipboard
+	tsStr := strconv.FormatInt(parsed.Unix(), 10)
+	pbcopy := exec.Command("pbcopy")
+	pbcopy.Stdin = strings.NewReader(tsStr)
+	_ = pbcopy.Run()
+	ctx.Output.Success("Unix timestamp copied to clipboard")
+
+	return nil
+}
+
+// formatRelativeTime returns a human-readable relative time string.
+func formatRelativeTime(d time.Duration) string {
+	if d < 0 {
+		d = -d
+	}
+	switch {
+	case d < time.Minute:
+		return "just now"
+	case d < time.Hour:
+		return fmt.Sprintf("%d minutes ago", int(d.Minutes()))
+	case d < 24*time.Hour:
+		return fmt.Sprintf("%d hours ago", int(d.Hours()))
+	case d < 365*24*time.Hour:
+		return fmt.Sprintf("%d days ago", int(d.Hours()/24))
+	default:
+		return fmt.Sprintf("%.1f years ago", d.Hours()/(24*365))
+	}
 }
 
 // --- Password Generator ---

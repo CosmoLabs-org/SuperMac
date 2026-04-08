@@ -113,6 +113,14 @@ func (s *ScreenshotModule) Commands() []module.Command {
 			Description: "Reset all screenshot settings to defaults",
 			Run:         s.reset,
 		},
+		{
+			Name:        "record",
+			Description: "Start or stop screen recording",
+			Args: []module.Arg{
+				{Name: "action", Required: false, Description: "stop to end recording (default: start)"},
+			},
+			Run: s.record,
+		},
 	}
 }
 
@@ -605,6 +613,74 @@ func (s *ScreenshotModule) take(ctx *module.Context) error {
 	}
 
 	ctx.Output.Info("Saved to: %s", filename)
+	return nil
+}
+
+// --- Record ---
+
+func (s *ScreenshotModule) record(ctx *module.Context) error {
+	if len(ctx.Args) > 0 && strings.ToLower(ctx.Args[0]) == "stop" {
+		return s.stopRecording(ctx)
+	}
+	return s.startRecording(ctx)
+}
+
+func (s *ScreenshotModule) startRecording(ctx *module.Context) error {
+	// Check if a recording is already in progress
+	if _, err := exec.Command("pgrep", "-x", "screencapture").Output(); err == nil {
+		ctx.Output.Warning("A screen recording is already in progress")
+		ctx.Output.Info("Use 'mac screenshot record stop' to stop it")
+		return nil
+	}
+
+	timestamp := time.Now().Unix()
+	filename := fmt.Sprintf("/tmp/screen-recording-%d.mov", timestamp)
+
+	ctx.Output.Info("Starting screen recording...")
+	ctx.Output.Info("Recording to: %s", filename)
+	ctx.Output.Info("Use 'mac screenshot record stop' to stop recording")
+	fmt.Println()
+
+	cmd := exec.Command("screencapture", "-v", "-C", filename)
+	if err := cmd.Start(); err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to start recording: %v", err))
+	}
+
+	ctx.Output.Success("Recording started (PID: %d)", cmd.Process.Pid)
+	return nil
+}
+
+func (s *ScreenshotModule) stopRecording(ctx *module.Context) error {
+	ctx.Output.Info("Stopping screen recording...")
+
+	out, err := exec.Command("pgrep", "-x", "screencapture").Output()
+	if err != nil || len(out) == 0 {
+		ctx.Output.Warning("No active screen recording found")
+		return nil
+	}
+
+	pids := strings.Fields(strings.TrimSpace(string(out)))
+	for _, pid := range pids {
+		if err := exec.Command("kill", pid).Run(); err != nil {
+			ctx.Output.Warning("Failed to stop recording process %s", pid)
+			continue
+		}
+	}
+
+	ctx.Output.Success("Screen recording stopped")
+
+	// Find the most recent recording file
+	if files, err := filepath.Glob("/tmp/screen-recording-*.mov"); err == nil && len(files) > 0 {
+		// Get the most recent file
+		latest := files[0]
+		for _, f := range files[1:] {
+			if f > latest {
+				latest = f
+			}
+		}
+		ctx.Output.Info("Recording saved to: %s", latest)
+	}
+
 	return nil
 }
 

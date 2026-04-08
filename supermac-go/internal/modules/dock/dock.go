@@ -90,6 +90,11 @@ func (d *DockModule) Commands() []module.Command {
 			Run: d.add,
 		},
 		{
+			Name:        "list",
+			Description: "List all items currently in the Dock",
+			Run:         d.list,
+		},
+		{
 			Name:        "remove",
 			Description: "Remove application from dock (requires dockutil)",
 			Args: []module.Arg{
@@ -507,4 +512,100 @@ func (d *DockModule) remove(ctx *module.Context) error {
 	restartDock(ctx)
 	ctx.Output.Success("Removed %s from dock", app)
 	return nil
+}
+
+func (d *DockModule) list(ctx *module.Context) error {
+	ctx.Output.Header("Dock Items")
+	fmt.Println()
+
+	// Parse persistent-apps
+	apps := d.parseDockSection(ctx, "persistent-apps")
+	others := d.parseDockSection(ctx, "persistent-others")
+
+	if len(apps) > 0 {
+		fmt.Println("  Applications:")
+		for i, name := range apps {
+			fmt.Printf("    %d. %s\n", i+1, name)
+		}
+		fmt.Println()
+	}
+
+	if len(others) > 0 {
+		fmt.Println("  Other Items:")
+		for i, name := range others {
+			fmt.Printf("    %d. %s\n", i+1, name)
+		}
+		fmt.Println()
+	}
+
+	if len(apps) == 0 && len(others) == 0 {
+		ctx.Output.Info("No dock items found")
+	}
+
+	total := len(apps) + len(others)
+	ctx.Output.Info("Total: %d items in Dock", total)
+	return nil
+}
+
+// parseDockSection reads a dock section (persistent-apps or persistent-others)
+// from defaults and extracts the file labels.
+func (d *DockModule) parseDockSection(ctx *module.Context, section string) []string {
+	out, err := exec.Command("defaults", "read", "com.apple.dock", section).Output()
+	if err != nil {
+		return nil
+	}
+
+	var items []string
+	text := string(out)
+
+	// Parse the output to find "file-label" entries
+	// The defaults output is in old-style plist format
+	lines := strings.Split(text, "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, `"file-label"`) {
+			// Extract the value from the next non-empty line or same line
+			parts := strings.SplitN(line, "=", 2)
+			if len(parts) == 2 {
+				label := strings.TrimSpace(parts[1])
+				label = strings.Trim(label, `" `)
+				label = strings.Trim(label, ";")
+				label = strings.TrimSpace(label)
+				if label != "" {
+					items = append(items, label)
+				}
+			}
+		}
+	}
+
+	// If file-label parsing didn't work, try extracting from tile data
+	if len(items) == 0 {
+		// Try to find "label" entries as fallback
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if strings.HasPrefix(line, `"label"`) || strings.HasPrefix(line, `label`) {
+				parts := strings.SplitN(line, "=", 2)
+				if len(parts) == 2 {
+					label := strings.TrimSpace(parts[1])
+					label = strings.Trim(label, `" `)
+					label = strings.Trim(label, ";")
+					if label != "" && label != "0" {
+						// Avoid duplicates from the same section
+						found := false
+						for _, existing := range items {
+							if existing == label {
+								found = true
+								break
+							}
+						}
+						if !found {
+							items = append(items, label)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return items
 }
