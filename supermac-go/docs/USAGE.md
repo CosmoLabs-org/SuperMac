@@ -16,7 +16,9 @@ mac <category> <action> [arguments] [flags]
 - [Global Shortcuts](#global-shortcuts)
 - [Built-in Commands](#built-in-commands)
 - [Modules](#modules)
+  - [apps](#apps--application-management)
   - [audio](#audio--audio-control--device-management)
+  - [bluetooth](#bluetooth--bluetooth-control--device-management)
   - [dev](#dev--developer-tools--utilities)
   - [display](#display--display--appearance-settings)
   - [dock](#dock--dock-management)
@@ -50,6 +52,12 @@ mac system info
 
 # Check battery health
 mac system battery
+
+# List installed applications
+mac apps list
+
+# Check Bluetooth status
+mac bluetooth status
 
 # Kill a process on port 3000
 mac kp 3000
@@ -94,6 +102,7 @@ Most commands use built-in macOS tools (`defaults`, `osascript`, `system_profile
 | Tool | Used by | Install |
 |------|---------|---------|
 | `SwitchAudioSource` | `audio input-device`, `audio output-device` | `brew install switchaudio-osx` |
+| `blueutil` | `bluetooth` (all commands) | `brew install blueutil` |
 | `dockutil` | `dock add`, `dock remove` | `brew install dockutil` |
 | `python3` | `dev json-format` | Pre-installed on macOS |
 | `curl` | `network public-ip`, `network speed-test` | Pre-installed on macOS |
@@ -162,6 +171,36 @@ mac search <term>                 # Search commands by keyword across all module
 
 ## Modules
 
+### apps -- Application Management
+
+List, inspect, kill, and open installed macOS applications.
+
+**6 commands.**
+
+| Command | Aliases | Args | What it does |
+|---------|---------|------|--------------|
+| `list` | | `[filter]` | List installed applications. Optionally filter by name. |
+| `info` | | `<appname>` | Show detailed app info: version, size, path, architecture |
+| `cache-clear` | | `<appname>` | Clear app cache/data (prompts for confirmation) |
+| `recent` | | | Show recently used applications |
+| `kill` | | `<appname>` | Force-quit an application |
+| `open` | | `<appname>` | Open an application |
+
+**Examples:**
+
+```bash
+mac apps list                       # List all installed apps
+mac apps list chrome                # Filter apps containing "chrome"
+mac apps info "Visual Studio Code"  # Version, size, path, arch
+mac apps cache-clear Safari         # Clear Safari cache (prompts first)
+mac apps cache-clear Safari -y      # Skip confirmation
+mac apps recent                     # Recently used apps
+mac apps kill Safari                # Force-quit Safari
+mac apps open "Visual Studio Code"  # Launch VS Code
+```
+
+---
+
 ### audio -- Audio Control and Device Management
 
 Control volume, mute, balance, and audio device switching.
@@ -202,11 +241,42 @@ mac audio status                  # Full audio status overview
 
 ---
 
+### bluetooth -- Bluetooth Control and Device Management
+
+Bluetooth power, device pairing, connections, and discoverability. Requires `blueutil`.
+
+**6 commands.**
+
+| Command | Aliases | Args | What it does |
+|---------|---------|------|--------------|
+| `status` | | | Show Bluetooth power state and connected devices |
+| `devices` | | | List all paired Bluetooth devices |
+| `connect` | | `<mac>` | Connect to a paired device by MAC address |
+| `disconnect` | | `<mac>` | Disconnect a device by MAC address |
+| `power` | | `[on/off/toggle]` | Control Bluetooth power. Omit arg to read current state. |
+| `discoverable` | | `<on/off>` | Set Bluetooth discoverable mode |
+
+**Examples:**
+
+```bash
+mac bluetooth status               # Power state + connected devices
+mac bluetooth devices              # All paired devices
+mac bluetooth connect "AA:BB:CC:DD:EE:FF"  # Connect to device
+mac bluetooth disconnect "AA:BB:CC:DD:EE:FF"  # Disconnect device
+mac bluetooth power                # Read current power state
+mac bluetooth power on             # Turn Bluetooth on
+mac bluetooth power toggle         # Toggle Bluetooth power
+mac bluetooth discoverable on      # Make discoverable
+mac bluetooth discoverable off     # Hide from scanning
+```
+
+---
+
 ### dev -- Developer Tools and Utilities
 
 Port management, process monitoring, HTTP serving, encoding utilities, and code generation.
 
-**14 commands.**
+**16 commands.**
 
 | Command | Aliases | Args | Flags | What it does |
 |---------|---------|------|-------|--------------|
@@ -224,6 +294,8 @@ Port management, process monitoring, HTTP serving, encoding utilities, and code 
 | `base64-encode` | `b64e` | `<text>` | | Base64 encode text and copy to clipboard |
 | `base64-decode` | `b64d` | `<text>` | | Base64 decode a string and copy to clipboard |
 | `password` | `pw` | `[length]` | | Generate a secure random password (default: 20 chars) and copy to clipboard |
+| `hash` | | `<file> [algorithm]` | | Compute file hash (`md5`, `sha1`, `sha256`, `sha512`). Default: `sha256`. Copies to clipboard. |
+| `timestamp` | `ts` | `[value]` | | Convert between unix timestamps and dates. No args = now. Number = timestamp to date. Date string = to unix timestamp. |
 
 **Examples:**
 
@@ -254,6 +326,14 @@ mac dev base64-decode "aGVsbG8="  # Decode and copy
 mac dev password                  # 20-char password copied to clipboard
 mac dev password 32               # 32-char password
 mac dev env                       # Show dev environment overview
+
+# Hash and timestamp
+mac dev hash release.tar.gz       # SHA256 hash (default) copied to clipboard
+mac dev hash data.bin md5         # MD5 hash
+mac dev hash data.bin sha512      # SHA512 hash
+mac dev timestamp                 # Current unix timestamp
+mac dev timestamp 1712592000      # Convert timestamp to readable date
+mac dev timestamp "2026-04-08"    # Convert date string to unix timestamp
 ```
 
 ---
@@ -298,7 +378,7 @@ mac display detect                # Re-detect displays
 
 Position, auto-hide, icon size, magnification, minimize effects, and app management.
 
-**10 commands.**
+**11 commands.**
 
 | Command | Aliases | Args | What it does |
 |---------|---------|------|--------------|
@@ -310,6 +390,7 @@ Position, auto-hide, icon size, magnification, minimize effects, and app managem
 | `minimize-effect` | | `<genie/scale>` | Set window minimize animation |
 | `add` | | `<app>` | Add application to dock (requires `dockutil`) |
 | `remove` | | `<app>` | Remove application from dock (requires `dockutil`) |
+| `list` | | | List all items currently in the Dock |
 | `status` | | | Show all current dock settings |
 | `reset` | | | Reset dock to factory defaults |
 
@@ -327,6 +408,7 @@ mac dock magnification-size 128   # Set magnified size to 128px
 mac dock minimize-effect scale    # Use scale minimize effect
 mac dock add "Visual Studio Code" # Add app to dock
 mac dock remove "Chess"           # Remove app from dock
+mac dock list                     # List all Dock items
 mac dock status                   # Show all dock settings
 mac dock reset                    # Reset everything to defaults
 ```
@@ -366,7 +448,7 @@ mac finder status                 # Show Finder settings
 
 IP addresses, DNS, connectivity checks, port scanning, speed tests, and network locations.
 
-**11 commands.**
+**12 commands.**
 
 | Command | Aliases | Args | Flags | What it does |
 |---------|---------|------|-------|--------------|
@@ -376,6 +458,7 @@ IP addresses, DNS, connectivity checks, port scanning, speed tests, and network 
 | `ping` | | `<host>` | `--count, -c` (default: `5`) | Ping a host with enhanced output |
 | `ports` | | | | Show listening ports and owning processes |
 | `interfaces` | | | | List all network interfaces with status and addresses |
+| `connections` | | | | Show all active network connections (lsof) |
 | `status` | `info` | | | Network overview: local IP, gateway, DNS, public IP |
 | `speed-test` | | | | Download speed test via Cloudflare |
 | `renew-dhcp` | | `[interface]` | | Renew DHCP lease (default: en0, requires sudo) |
@@ -393,6 +476,7 @@ mac network dns-flush             # Flush DNS (sudo)
 mac network ping google.com       # Ping 5 packets
 mac network ping 8.8.8.8 -c 3    # Ping 3 packets
 mac network ports                 # All listening ports
+mac network connections           # Active network connections
 mac network interfaces            # Interface list
 mac network speed-test            # Download speed test
 mac network renew-dhcp            # Renew DHCP on en0
@@ -407,7 +491,7 @@ mac network reset                 # Full network reset (destructive)
 
 Save location, format, shadows, cursor, naming, thumbnails, sound, and capture.
 
-**10 commands.**
+**11 commands.**
 
 | Command | Aliases | Args | What it does |
 |---------|---------|------|--------------|
@@ -419,6 +503,7 @@ Save location, format, shadows, cursor, naming, thumbnails, sound, and capture.
 | `thumbnail` | | `[on/off/toggle]` | Toggle screenshot thumbnail preview. Omit arg to read current. |
 | `sound` | | `[on/off/toggle]` | Toggle camera shutter sound. Omit arg to read current. |
 | `take` | | `[type]` | Take a screenshot now: `area` (default), `window`, or `screen` |
+| `record` | | `[stop]` | Start screen recording. Use `stop` to end recording. |
 | `status` | | | Show all screenshot settings plus keyboard shortcuts |
 | `reset` | | | Reset all screenshot settings to macOS defaults |
 
@@ -456,6 +541,10 @@ mac screenshot take               # Area selection screenshot
 mac screenshot take window        # Click a window to capture
 mac screenshot take screen        # Full screen screenshot
 
+# Screen recording
+mac screenshot record             # Start screen recording
+mac screenshot record stop        # Stop screen recording
+
 # Reset
 mac screenshot reset              # Back to factory defaults
 ```
@@ -466,7 +555,7 @@ mac screenshot reset              # Back to factory defaults
 
 Hardware info, memory, CPU, battery, disk usage, processes, cleanup, and uptime.
 
-**9 commands.**
+**11 commands.**
 
 | Command | Aliases | Args | What it does |
 |---------|---------|------|--------------|
@@ -479,6 +568,8 @@ Hardware info, memory, CPU, battery, disk usage, processes, cleanup, and uptime.
 | `disk-usage` | | `[path]` | Disk usage analysis. Default: home directory. Shows volume info and top 10 largest subdirectories. |
 | `processes` | | `[sort]` | Top processes by `cpu` (default) or `memory` |
 | `uptime` | | | System uptime with user count and load averages |
+| `updates` | | | Check for available macOS software updates |
+| `temperature` | `temp` | | Show CPU temperature (requires sudo) |
 
 **Examples:**
 
@@ -497,6 +588,8 @@ mac system cleanup                # Interactive cleanup (prompts first)
 mac system cleanup -y             # Cleanup without confirmation
 mac system cleanup --dry-run      # Preview what would be cleaned
 mac cleanup                       # Same via global shortcut
+mac system updates                # Check for macOS updates
+mac system temperature            # Show CPU temperature (sudo)
 ```
 
 ---
@@ -738,3 +831,5 @@ mac screenshot status           # Verify all settings
 - **Author**: CosmoLabs
 - **Repository**: https://github.com/cosmolabs-org/supermac
 - **Website**: https://cosmolabs.org
+- **Modules**: 11 (apps, audio, bluetooth, dev, display, dock, finder, network, screenshot, system, wifi)
+- **Commands**: 107
