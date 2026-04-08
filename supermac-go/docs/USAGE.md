@@ -1,282 +1,580 @@
-# SuperMac — Usage Guide
+# SuperMac -- Usage Guide
 
-**Professional macOS power tools for the command line.**
+Professional macOS power tools for the command line.
 
-`mac <category> <action> [arguments]`
+```
+mac <category> <action> [arguments] [flags]
+```
+
+---
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Global Flags](#global-flags)
+- [Global Shortcuts](#global-shortcuts)
+- [Built-in Commands](#built-in-commands)
+- [Modules](#modules)
+  - [audio](#audio--audio-control--device-management)
+  - [dev](#dev--developer-tools--utilities)
+  - [display](#display--display--appearance-settings)
+  - [dock](#dock--dock-management)
+  - [finder](#finder--file-visibility--finder-management)
+  - [network](#network--network-information--troubleshooting)
+  - [screenshot](#screenshot--screenshot-settings--management)
+  - [system](#system--system-information--maintenance)
+  - [wifi](#wifi--wifi-control--management)
+- [Output Formats](#output-formats)
+- [Configuration](#configuration)
+- [Shell Completions](#shell-completions)
+- [Real-World Examples](#real-world-examples)
+- [Project](#project)
+
+---
+
+## Quick Start
+
+```bash
+# See everything available
+mac help
+
+# Check your IP address
+mac ip
+
+# Toggle dark mode
+mac dark
+
+# Show system info
+mac system info
+
+# Check battery health
+mac system battery
+
+# Kill a process on port 3000
+mac kp 3000
+
+# Search for any command by keyword
+mac search volume
+```
 
 ---
 
 ## Installation
 
+### From Source
+
 ```bash
-# Homebrew (recommended)
-brew install cosmolabs-org/tap/supermac
-
-# One-line install
-curl -fsSL https://cosmolabs.org/install | bash
-
-# From source
 git clone https://github.com/cosmolabs-org/supermac.git
-cd supermac/supermac-go && make install
+cd supermac/supermac-go
+
+# Build the binary
+make build
+
+# Install to ~/bin/
+make install
+
+# Verify
+mac version
 ```
+
+### Build Details
+
+The Makefile embeds version and build date at compile time using `-ldflags`:
+
+```bash
+make build                    # Uses git describe for version
+VERSION=1.0.0 make build      # Override version manually
+```
+
+### Dependencies
+
+Most commands use built-in macOS tools (`defaults`, `osascript`, `system_profiler`). A few commands benefit from optional third-party tools:
+
+| Tool | Used by | Install |
+|------|---------|---------|
+| `SwitchAudioSource` | `audio input-device`, `audio output-device` | `brew install switchaudio-osx` |
+| `dockutil` | `dock add`, `dock remove` | `brew install dockutil` |
+| `python3` | `dev json-format` | Pre-installed on macOS |
+| `curl` | `network public-ip`, `network speed-test` | Pre-installed on macOS |
+
+---
 
 ## Global Flags
 
-| Flag | Description |
-|------|-------------|
-| `--json` | Output in JSON format (for scripting) |
-| `--quiet` | Suppress all output except errors |
-| `--no-color` | Disable color output |
-| `--verbose` | Verbose output |
-| `--dry-run` | Show what would be done without executing |
-| `--yes`, `-y` | Skip confirmation prompts |
+These flags apply to every command.
+
+| Flag | Short | Description |
+|------|-------|-------------|
+| `--json` | | Output in JSON format for scripting |
+| `--quiet` | | Suppress all output except errors |
+| `--no-color` | | Disable colorized output |
+| `--verbose` | `-v` | Enable verbose output |
+| `--dry-run` | | Show what would be done without executing |
+| `--yes` | `-y` | Skip confirmation prompts |
+
+```bash
+mac system memory --json          # JSON output for scripts
+mac system cleanup --dry-run      # Preview without making changes
+mac system cleanup -y             # Skip "are you sure?" prompt
+mac wifi status --quiet           # Only errors, nothing else
+```
+
+---
+
+## Global Shortcuts
+
+Top-level convenience commands that delegate to module subcommands. These mirror the original Bash CLI's global shortcuts.
+
+| Shortcut | Expands to | What it does |
+|----------|------------|--------------|
+| `mac ip` | `mac network ip` | Show local IP address |
+| `mac cleanup` | `mac system cleanup` | Clean caches, logs, temp files |
+| `mac restart-finder` | `mac finder restart` | Restart the Finder process |
+| `mac kp <port>` | `mac dev kill-port <port>` | Kill process on a port |
+| `mac vol` | `mac audio volume` | Show or set volume |
+| `mac dark` | `mac display dark-mode on` | Enable dark mode |
+| `mac light` | `mac display dark-mode off` | Switch to light mode |
+| `mac search <term>` | (built-in) | Search all commands by keyword |
+
+```bash
+mac ip                            # Quick IP check
+mac kp 3000                       # Free up port 3000
+mac dark                          # Switch to dark mode
+mac vol 50                        # Set volume to 50%
+mac search battery                # Find battery-related commands
+```
+
+---
 
 ## Built-in Commands
 
 ```bash
-mac version              # Show version and system info
-mac help                 # Show help
-mac help <category>      # Show commands for a category
-mac config list          # Show current configuration
-mac config get <key>     # Get a config value
-mac config set <key> <val> # Set a config value
-mac config edit          # Open config in $EDITOR
+mac version                       # Show version, build date, loaded modules
+mac help                          # Show top-level help with all categories
+mac help <category>               # Show commands for a specific category
+mac config list                   # Show current configuration
+mac config get <key>              # Get a specific config value
+mac search <term>                 # Search commands by keyword across all modules
 ```
 
 ---
 
 ## Modules
 
-### 📁 finder — File Visibility & Finder Management
+### audio -- Audio Control and Device Management
 
-Control hidden files, Finder restarts, and file revealing.
+Control volume, mute, balance, and audio device switching.
 
-```bash
-mac finder show-hidden       # Show hidden files in Finder
-mac finder hide-hidden       # Hide hidden files
-mac finder toggle-hidden     # Toggle hidden files visibility
-mac finder reveal <path>     # Reveal file in Finder
-mac finder restart           # Restart Finder
-mac finder status            # Show Finder settings
-```
+**11 commands.**
+
+| Command | Aliases | Args | What it does |
+|---------|---------|------|--------------|
+| `volume` | | `[level]` | Get or set system volume (0-100). Omit arg to read current. |
+| `up` | | `[step]` | Increase volume by step (default: 10) |
+| `down` | | `[step]` | Decrease volume by step (default: 10) |
+| `mute` | | | Mute system audio |
+| `unmute` | | | Unmute system audio |
+| `toggle-mute` | | | Toggle mute state |
+| `devices` | | `[type]` | List audio devices. Type: `all` (default), `input`, `output` |
+| `input-device` | `input` | `<name>` | Switch input audio device (requires SwitchAudioSource) |
+| `output-device` | `output` | `<name>` | Switch output audio device (requires SwitchAudioSource) |
+| `status` | | | Show volume, mute state, active devices, sound effects |
+| `balance` | | `[position]` | Set audio balance: `left`, `right`, `center`, or `0-100` |
 
 **Examples:**
+
 ```bash
-mac finder toggle-hidden     # Quick toggle to see/hide dotfiles
-mac finder reveal ~/Desktop/screenshot.png  # Open Finder to file
+mac audio volume                  # Show current volume
+mac audio volume 50               # Set volume to 50%
+mac audio up                      # Increase by 10
+mac audio up 25                   # Increase by 25
+mac audio mute                    # Mute
+mac audio toggle-mute             # Toggle mute
+mac audio devices                 # List all audio devices
+mac audio devices output          # List only output devices
+mac audio output "External Speakers"  # Switch output device
+mac audio input "Blue Yeti"       # Switch input device
+mac audio balance left            # Pan audio fully left
+mac audio balance 75              # Pan 75% right
+mac audio status                  # Full audio status overview
 ```
 
 ---
 
-### 🌐 wifi — WiFi Control & Management
+### dev -- Developer Tools and Utilities
 
-Manage WiFi connections, scan networks, check signal strength.
+Port management, process monitoring, HTTP serving, encoding utilities, and code generation.
 
-```bash
-mac wifi on                  # Turn WiFi on
-mac wifi off                 # Turn WiFi off
-mac wifi toggle              # Toggle WiFi state
-mac wifi status              # Show current connection info
-mac wifi scan                # Scan for available networks
-mac wifi connect <network>   # Connect to a network
-mac wifi connect <network> <password>  # Connect with password
-mac wifi forget <network>    # Forget a saved network
-mac wifi info                # Detailed connection information
-```
+**14 commands.**
+
+| Command | Aliases | Args | Flags | What it does |
+|---------|---------|------|-------|--------------|
+| `kill-port` | `kp` | `<port>` | | Kill the process listening on a port |
+| `ports` | `list-ports` | | | Show all processes using network ports, with common dev port highlights |
+| `servers` | | | | List running dev servers on common ports (3000, 5000, 8080, etc.) |
+| `localhost` | | `<port>` | `--protocol, -p` (default: `http`) | Open localhost URL in default browser |
+| `serve` | | `[dir]` | `--port, -p` (default: `8000`) | Start HTTP server for a directory |
+| `processes` | | | `--sort, -s` (default: `cpu`), `--count, -n` (default: `15`) | Enhanced process viewer |
+| `cpu-hogs` | | | | Show top 10 CPU-consuming processes (>1% CPU) |
+| `memory-hogs` | | | | Show top 10 memory-consuming processes (>1% memory) |
+| `uuid` | | | | Generate a UUID v4 and copy to clipboard |
+| `env` | | | | Show language versions, tools, shell, and editor |
+| `json-format` | `jf` | `<file>` | | Pretty-print a JSON file in-place |
+| `base64-encode` | `b64e` | `<text>` | | Base64 encode text and copy to clipboard |
+| `base64-decode` | `b64d` | `<text>` | | Base64 decode a string and copy to clipboard |
+| `password` | `pw` | `[length]` | | Generate a secure random password (default: 20 chars) and copy to clipboard |
 
 **Examples:**
+
 ```bash
-mac wifi toggle              # Quick WiFi on/off
-mac wifi status --json       # Machine-readable status
-mac wifi scan | grep Office  # Find Office network
+# Port management
+mac dev kill-port 3000            # Kill whatever is on port 3000
+mac kp 3000                       # Same thing via global shortcut
+mac dev ports                     # Show all listening ports
+mac dev servers                   # See which dev servers are running
+
+# HTTP serving
+mac dev serve                     # Serve current directory on port 8000
+mac dev serve ./dist -p 3000      # Serve ./dist on port 3000
+mac dev localhost 3000            # Open localhost:3000 in browser
+mac dev localhost 443 -p https    # Open https://localhost:443
+
+# Process inspection
+mac dev processes                 # Top 15 by CPU
+mac dev processes -s memory -n 20 # Top 20 by memory
+mac dev cpu-hogs                  # Processes eating CPU
+mac dev memory-hogs               # Processes eating memory
+
+# Utilities
+mac dev uuid                      # Generate + copy UUID
+mac dev json-format data.json     # Pretty-print JSON in place
+mac dev base64-encode "hello"     # Encode and copy
+mac dev base64-decode "aGVsbG8="  # Decode and copy
+mac dev password                  # 20-char password copied to clipboard
+mac dev password 32               # 32-char password
+mac dev env                       # Show dev environment overview
 ```
 
 ---
 
-### 📡 network — Network Information & Troubleshooting
+### display -- Display and Appearance Settings
 
-IP addresses, DNS, connectivity checks, port scanning.
+Brightness, dark mode, Night Shift, True Tone, wallpaper, and resolution.
 
-```bash
-mac network ip               # Show local and public IP
-mac network public-ip        # Show public IP only
-mac network dns-flush        # Flush DNS cache (requires sudo)
-mac network ping <host>      # Ping a host
-mac network ports            # Show listening ports
-mac network interfaces       # List network interfaces
-mac network status           # Network status overview
-mac network reset            # Reset network settings (requires sudo)
-```
+**8 commands.**
+
+| Command | Aliases | Args | What it does |
+|---------|---------|------|--------------|
+| `brightness` | | `<0-100>` | Set screen brightness percentage |
+| `dark-mode` | `light-mode`, `toggle-mode` | `on/off/toggle` | Control dark mode appearance |
+| `night-shift` | | `on/off` | Enable or disable Night Shift |
+| `true-tone` | | `on/off` | Enable or disable True Tone |
+| `wallpaper` | | `<path>` | Set desktop wallpaper from image file |
+| `status` | | | Show brightness, appearance mode, Night Shift, display count, resolution |
+| `detect` | | | Force detect connected displays |
+| `resolution` | `res` | | List current and available display resolutions |
 
 **Examples:**
+
 ```bash
-mac network ip --json        # {"local": "192.168.1.5", "public": "203.0.113.1"}
-mac network ports            # Show what's listening
-mac network ping google.com  # Test connectivity
+mac display brightness 50         # Set brightness to 50%
+mac display dark-mode on          # Enable dark mode
+mac display dark-mode off         # Switch to light mode
+mac display dark-mode toggle      # Toggle between dark and light
+mac dark                          # Shortcut: dark mode on
+mac light                         # Shortcut: light mode off
+mac display night-shift on        # Reduce blue light
+mac display true-tone off         # Disable True Tone
+mac display wallpaper ~/Photos/bg.jpg  # Set wallpaper
+mac display status                # Show all display settings
+mac display resolution            # Show current resolution
+mac display detect                # Re-detect displays
 ```
 
 ---
 
-### 🖥️ system — System Information & Maintenance
+### dock -- Dock Management
 
-Hardware info, memory stats, battery status, system cleanup.
+Position, auto-hide, icon size, magnification, minimize effects, and app management.
 
-```bash
-mac system info              # System overview (hostname, OS, uptime)
-mac system cleanup           # Clean caches, logs, temp files
-mac system battery           # Battery status and health
-mac system memory            # Memory usage breakdown
-mac system cpu               # CPU info and usage
-mac system hardware          # Detailed hardware specs
-```
+**10 commands.**
+
+| Command | Aliases | Args | What it does |
+|---------|---------|------|--------------|
+| `position` | | `<left/bottom/right>` | Set dock position. Also accepts `l`, `b`, `r`. |
+| `autohide` | | `<on/off/toggle>` | Toggle dock auto-hide behavior |
+| `size` | | `<value>` | Set icon size: `small` (32px), `medium` (64px), `large` (96px), or pixel count |
+| `magnification` | | `<on/off/toggle>` | Toggle dock icon magnification on hover |
+| `magnification-size` | | `<pixels>` | Set magnified icon size (16-256 pixels) |
+| `minimize-effect` | | `<genie/scale>` | Set window minimize animation |
+| `add` | | `<app>` | Add application to dock (requires `dockutil`) |
+| `remove` | | `<app>` | Remove application from dock (requires `dockutil`) |
+| `status` | | | Show all current dock settings |
+| `reset` | | | Reset dock to factory defaults |
 
 **Examples:**
+
 ```bash
-mac system memory --json     # Machine-readable memory stats
-mac system battery           # Check battery health
-mac system cleanup --dry-run # See what would be cleaned
-mac system cleanup -y        # Skip confirmation prompts
+mac dock position left            # Move dock to left side
+mac dock position bottom          # Move dock to bottom
+mac dock autohide on              # Enable auto-hide
+mac dock autohide toggle          # Toggle auto-hide
+mac dock size small               # Small icons (32px)
+mac dock size 48                  # Custom 48px icons
+mac dock magnification on         # Enable magnification on hover
+mac dock magnification-size 128   # Set magnified size to 128px
+mac dock minimize-effect scale    # Use scale minimize effect
+mac dock add "Visual Studio Code" # Add app to dock
+mac dock remove "Chess"           # Remove app from dock
+mac dock status                   # Show all dock settings
+mac dock reset                    # Reset everything to defaults
 ```
 
 ---
 
-### 💻 dev — Developer Tools & Utilities
+### finder -- File Visibility and Finder Management
 
-Port management, process monitoring, HTTP serving, UUIDs.
+Hidden files, Finder restarts, file revealing.
 
-```bash
-mac dev kill-port <port>     # Kill process on a port
-mac dev ports                # Show all listening ports
-mac dev servers              # Show running servers
-mac dev localhost <port>     # Start localhost server
-mac dev serve <dir> <port>   # Serve a directory over HTTP
-mac dev processes            # List running processes
-mac dev processes --sort cpu # Sort by CPU usage
-mac dev cpu-hogs             # Show top CPU consumers
-mac dev memory-hogs          # Show top memory consumers
-mac dev uuid                 # Generate a UUID
-mac dev env                  # Show environment variables
-```
+**6 commands.**
+
+| Command | Aliases | Args | What it does |
+|---------|---------|------|--------------|
+| `show-hidden` | | | Show hidden (dot) files in Finder |
+| `hide-hidden` | | | Hide hidden files in Finder |
+| `toggle-hidden` | | | Toggle hidden files visibility |
+| `reveal` | | `<path>` | Reveal a file or folder in Finder |
+| `restart` | | | Restart the Finder process |
+| `status` | | | Show Finder version and hidden files state |
 
 **Examples:**
+
 ```bash
-mac dev kill-port 3000       # Free up port 3000
-mac dev serve . 8080         # Serve current directory
-mac dev uuid                 # Generate UUID for scripts
-mac dev processes --sort memory --json  # JSON process list
+mac finder show-hidden            # Show dotfiles in Finder
+mac finder hide-hidden            # Hide dotfiles
+mac finder toggle-hidden          # Quick toggle
+mac finder reveal ~/Desktop/file.txt  # Open Finder to file
+mac finder restart                # Restart Finder
+mac restart-finder                # Same via global shortcut
+mac finder status                 # Show Finder settings
 ```
 
 ---
 
-### 🖥️ display — Display & Appearance Settings
+### network -- Network Information and Troubleshooting
 
-Brightness, dark mode, Night Shift, True Tone, wallpaper.
+IP addresses, DNS, connectivity checks, port scanning, speed tests, and network locations.
 
-```bash
-mac display brightness <0-100>  # Set brightness level
-mac display dark-mode on      # Enable dark mode
-mac display dark-mode off     # Disable dark mode
-mac display dark-mode toggle  # Toggle dark mode
-mac display night-shift on    # Enable Night Shift
-mac display night-shift off   # Disable Night Shift
-mac display true-tone on      # Enable True Tone
-mac display true-tone off     # Disable True Tone
-mac display wallpaper <path>  # Set desktop wallpaper
-mac display status            # Show display settings
-```
+**11 commands.**
+
+| Command | Aliases | Args | Flags | What it does |
+|---------|---------|------|-------|--------------|
+| `ip` | | | | Show local IP address and interface |
+| `public-ip` | | | | Show public IP with geolocation (city, country, ISP) |
+| `dns-flush` | `flush-dns` | | | Flush DNS cache (requires sudo) |
+| `ping` | | `<host>` | `--count, -c` (default: `5`) | Ping a host with enhanced output |
+| `ports` | | | | Show listening ports and owning processes |
+| `interfaces` | | | | List all network interfaces with status and addresses |
+| `status` | `info` | | | Network overview: local IP, gateway, DNS, public IP |
+| `speed-test` | | | | Download speed test via Cloudflare |
+| `renew-dhcp` | | `[interface]` | | Renew DHCP lease (default: en0, requires sudo) |
+| `reset` | | | | Reset all network settings (requires sudo) |
+| `locations` | `loc` | | | List network locations and highlight current |
 
 **Examples:**
+
 ```bash
-mac display brightness 50     # Set to 50%
-mac display dark-mode toggle  # Quick dark/light toggle
-mac display status --json     # All display settings as JSON
+mac network ip                    # Local IP and interface
+mac ip                            # Same via global shortcut
+mac network public-ip             # Public IP with geo info
+mac network status                # Full network overview
+mac network dns-flush             # Flush DNS (sudo)
+mac network ping google.com       # Ping 5 packets
+mac network ping 8.8.8.8 -c 3    # Ping 3 packets
+mac network ports                 # All listening ports
+mac network interfaces            # Interface list
+mac network speed-test            # Download speed test
+mac network renew-dhcp            # Renew DHCP on en0
+mac network renew-dhcp en1        # Renew DHCP on en1
+mac network locations             # Show network locations
+mac network reset                 # Full network reset (destructive)
 ```
 
 ---
 
-### 🚢 dock — Dock Management & Positioning
+### screenshot -- Screenshot Settings and Management
 
-Dock position, auto-hide, icon size, magnification, minimize effects.
+Save location, format, shadows, cursor, naming, thumbnails, sound, and capture.
 
-```bash
-mac dock position <left|bottom|right|top>  # Set dock position
-mac dock autohide on          # Enable dock auto-hide
-mac dock autohide off         # Disable dock auto-hide
-mac dock autohide toggle      # Toggle auto-hide
-mac dock size <value>         # Set icon size (1-128)
-mac dock magnification on     # Enable magnification
-mac dock magnification off    # Disable magnification
-mac dock magnification toggle # Toggle magnification
-mac dock magnification-size <value>  # Set magnified size
-mac dock minimize-effect <genie|scale>  # Set minimize effect
-mac dock status               # Show dock settings
-mac dock reset                # Reset dock to defaults
-```
+**10 commands.**
+
+| Command | Aliases | Args | What it does |
+|---------|---------|------|--------------|
+| `location` | `loc` | `[destination]` | Get or set screenshot save location. Named destinations: `desktop`, `downloads`, `clipboard`, `documents`, `pictures`. Or a custom path. |
+| `format` | `type` | `[format]` | Get or set file format: `png`, `jpg`, `tiff`, `gif` |
+| `shadow` | `shadows` | `[on/off/toggle]` | Control window shadow in screenshots. Omit arg to read current. |
+| `cursor` | `show-cursor` | `[show/hide/toggle]` | Control cursor visibility in screenshots. Omit arg to read current. |
+| `naming` | `name-format`, `name` | `[mode]` | Set naming: `sequential` or `timestamp`. Or a custom format string. |
+| `thumbnail` | | `[on/off/toggle]` | Toggle screenshot thumbnail preview. Omit arg to read current. |
+| `sound` | | `[on/off/toggle]` | Toggle camera shutter sound. Omit arg to read current. |
+| `take` | | `[type]` | Take a screenshot now: `area` (default), `window`, or `screen` |
+| `status` | | | Show all screenshot settings plus keyboard shortcuts |
+| `reset` | | | Reset all screenshot settings to macOS defaults |
 
 **Examples:**
+
 ```bash
-mac dock position bottom      # Move dock to bottom
-mac dock size 48              # Set icon size
-mac dock status               # See all current dock settings
+# Location
+mac screenshot location           # Show current save location
+mac screenshot location desktop   # Save to Desktop
+mac screenshot location ~/Pictures/Screenshots  # Custom path
+mac screenshot location clipboard # Save to clipboard only
+
+# Format
+mac screenshot format             # Show current format
+mac screenshot format jpg         # Set JPEG (smaller files)
+mac screenshot format png         # Set PNG (best quality)
+
+# Shadows and cursor
+mac screenshot shadow off         # No shadow on window captures
+mac screenshot shadow toggle      # Toggle shadow
+mac screenshot cursor show        # Include cursor in screenshots
+mac screenshot cursor toggle      # Toggle cursor
+
+# Naming
+mac screenshot naming sequential  # Screenshot, Screenshot 1, Screenshot 2...
+mac screenshot naming timestamp   # Screenshot 2026-04-08 at 14.30.00
+
+# Other settings
+mac screenshot thumbnail off      # Disable thumbnail preview
+mac screenshot sound off          # Disable shutter sound
+mac screenshot status             # See all current settings
+
+# Capture
+mac screenshot take               # Area selection screenshot
+mac screenshot take window        # Click a window to capture
+mac screenshot take screen        # Full screen screenshot
+
+# Reset
+mac screenshot reset              # Back to factory defaults
 ```
 
 ---
 
-### 🔊 audio — Audio Control & Device Management
+### system -- System Information and Maintenance
 
-Volume control, mute, device switching.
+Hardware info, memory, CPU, battery, disk usage, processes, cleanup, and uptime.
 
-```bash
-mac audio volume              # Show current volume
-mac audio volume <0-100>      # Set volume level
-mac audio volume up           # Increase volume
-mac audio volume down         # Decrease volume
-mac audio volume mute         # Mute audio
-mac audio volume unmute       # Unmute audio
-mac audio volume toggle-mute  # Toggle mute
-mac audio devices             # List audio devices
-mac audio input-device <name> # Switch input device
-mac audio output-device <name> # Switch output device
-mac audio status              # Show audio settings
-```
+**9 commands.**
+
+| Command | Aliases | Args | What it does |
+|---------|---------|------|--------------|
+| `info` | | | Comprehensive system overview: OS, arch, hostname, uptime, shell, storage |
+| `cleanup` | | | Deep cleanup: user caches, old downloads (30+ days), trash, logs, Safari cache, temp files, font caches |
+| `battery` | | | Battery charge, charging status, time remaining, cycle count, health |
+| `memory` | `mem` | | Memory usage: total, used, free, active, inactive, wired, compressed, swap, pressure assessment |
+| `cpu` | | | CPU model, cores, threads, current usage, load average |
+| `hardware` | | | Full hardware specs: model, chip, memory, serial, OS, build, architecture |
+| `disk-usage` | | `[path]` | Disk usage analysis. Default: home directory. Shows volume info and top 10 largest subdirectories. |
+| `processes` | | `[sort]` | Top processes by `cpu` (default) or `memory` |
+| `uptime` | | | System uptime with user count and load averages |
 
 **Examples:**
+
 ```bash
-mac audio volume 50           # Set volume to 50%
-mac audio volume up           # Increase by configured step (default: 10)
-mac audio devices --json      # List devices as JSON
-mac audio output-device "External Speakers"  # Switch output
+mac system info                   # Full system overview
+mac system hardware               # Hardware specs
+mac system battery                # Battery health check
+mac system memory                 # Memory usage breakdown
+mac system cpu                    # CPU info and current usage
+mac system disk-usage             # Home directory disk usage
+mac system disk-usage /Applications  # Specific directory
+mac system processes              # Top processes by CPU
+mac system processes memory       # Top processes by memory
+mac system uptime                 # How long since last boot
+mac system cleanup                # Interactive cleanup (prompts first)
+mac system cleanup -y             # Cleanup without confirmation
+mac system cleanup --dry-run      # Preview what would be cleaned
+mac cleanup                       # Same via global shortcut
 ```
 
 ---
 
-### 📸 screenshot — Screenshot Settings & Management
+### wifi -- WiFi Control and Management
 
-Screenshot location, format, shadow, cursor settings.
+WiFi power, connections, scanning, saved networks, and signal strength.
 
-```bash
-mac screenshot location       # Show save location
-mac screenshot location <path> # Set save location
-mac screenshot format         # Show current format
-mac screenshot format <png|jpg|tiff|gif>  # Set format
-mac screenshot shadow on      # Include window shadow
-mac screenshot shadow off     # Exclude window shadow
-mac screenshot shadow toggle  # Toggle shadow
-mac screenshot cursor show    # Show cursor in screenshots
-mac screenshot cursor hide    # Hide cursor in screenshots
-mac screenshot cursor toggle  # Toggle cursor visibility
-mac screenshot naming sequential # Sequential naming (Screenshot 1, 2...)
-mac screenshot naming timestamp # Timestamp naming
-mac screenshot status         # Show all screenshot settings
-mac screenshot reset          # Reset to defaults
-```
+**9 commands.**
+
+| Command | Aliases | Args | What it does |
+|---------|---------|------|--------------|
+| `on` | | | Turn WiFi on. Shows current connection after enabling. |
+| `off` | | | Turn WiFi off |
+| `toggle` | | | Toggle WiFi on/off |
+| `status` | | | Show interface, power state, connected network, signal strength, IP |
+| `scan` | | | Scan for available WiFi networks (shows SSID, signal, security) |
+| `connect` | `join` | `<network> [password]` | Connect to a WiFi network, optionally with password |
+| `forget` | | `<network>` | Remove a saved WiFi network |
+| `info` | | | Detailed connection info: SSID, BSSID, channel, country, gateway, DNS |
+| `list-saved` | `saved` | | List all preferred/saved WiFi networks |
 
 **Examples:**
+
 ```bash
-mac screenshot location ~/Pictures/Screenshots  # Custom save path
-mac screenshot format jpg     # Use JPEG format
-mac screenshot shadow off     # No shadow on window screenshots
-mac screenshot status         # See all settings
+mac wifi on                       # Turn WiFi on
+mac wifi off                      # Turn WiFi off
+mac wifi toggle                   # Toggle WiFi
+mac wifi status                   # Current connection info
+mac wifi scan                     # Scan for nearby networks
+mac wifi connect "OfficeWiFi"     # Connect to known network
+mac wifi connect "Guest" "p@ss"   # Connect with password
+mac wifi forget "OldNetwork"      # Remove saved network
+mac wifi info                     # Detailed connection details
+mac wifi list-saved               # All saved networks
+```
+
+---
+
+## Output Formats
+
+### JSON Output
+
+Every command supports `--json` for machine-readable output:
+
+```bash
+mac system memory --json
+mac wifi status --json
+mac audio devices --json
+mac network ip --json
+mac config list --json
+```
+
+Example output from `mac system memory --json`:
+
+```json
+{
+  "type": "success",
+  "message": "Memory: 16 GB total, 8 GB free"
+}
+```
+
+### Quiet Mode
+
+Use `--quiet` to suppress all output except errors. Useful in scripts where you only care about success or failure:
+
+```bash
+mac display dark-mode on --quiet
+mac audio volume 50 --quiet
+```
+
+### Verbose Mode
+
+Use `--verbose` or `-v` for additional detail during execution:
+
+```bash
+mac network ping google.com --verbose
+mac system cleanup -v
 ```
 
 ---
@@ -285,47 +583,46 @@ mac screenshot status         # See all settings
 
 SuperMac stores configuration in `~/.supermac/config.yaml`.
 
+```bash
+mac config list                   # Show all settings
+mac config get output.format      # Get specific value
+mac config get updates.channel    # Check update channel
+```
+
+**Supported config keys for `config get`:**
+
+| Key | Values | Default |
+|-----|--------|---------|
+| `output.format` | `text`, `json`, `quiet` | `text` |
+| `output.color` | `true`, `false` | `true` |
+| `updates.check` | `true`, `false` | `true` |
+| `updates.channel` | `stable`, `beta` | `stable` |
+
+**Example configuration file:**
+
 ```yaml
 version: 1
 
 output:
   color: true
-  format: text         # text | json | quiet
+  format: text
 
 updates:
   check: true
-  channel: stable      # stable | beta
-
-modules:
-  screenshot:
-    location: Desktop
-    format: PNG
-    shadow: false
-  audio:
-    volume_step: 10
-  display:
-    brightness_step: 10
+  channel: stable
 
 aliases:
   kp: "dev kill-port"
   dark: "display dark-mode"
-  light: "display light-mode"
   ip: "network ip"
   cleanup: "system cleanup"
-```
-
-### Config Commands
-
-```bash
-mac config list               # Show all settings
-mac config get output.format  # Get specific value
-mac config set output.format json  # Set value
-mac config edit               # Open in $EDITOR
 ```
 
 ---
 
 ## Shell Completions
+
+Generate completion scripts for your shell:
 
 ```bash
 # Zsh
@@ -338,25 +635,99 @@ mac completion bash > /etc/bash_completion.d/mac
 mac completion fish > ~/.config/fish/completions/mac.fish
 ```
 
+After generating, restart your shell or source the file to activate completions.
+
 ---
 
-## JSON Output
+## Real-World Examples
 
-Every command supports `--json` for scripting:
+### Daily Workflow
 
 ```bash
-mac system memory --json
-mac wifi status --json
-mac audio devices --json
-mac network ip --json
+# Morning system check
+mac system info                   # OS version, uptime, storage
+mac system battery                # Battery health
+mac wifi status                   # Am I connected?
+
+# Quick adjustments
+mac dark                          # Switch to dark mode
+mac display brightness 60         # Comfortable brightness
+mac audio volume 40               # Reasonable volume
 ```
 
-Example output:
-```json
-{
-  "type": "success",
-  "message": "Memory: 16 GB total, 8 GB free"
-}
+### Development Setup
+
+```bash
+# Check what's running
+mac dev servers                   # Running dev servers
+mac dev ports                     # All listening ports
+
+# Free up ports
+mac kp 3000                       # Kill React dev server
+mac kp 5000                       # Kill Flask server
+
+# Start a local server
+mac dev serve ./dist -p 8080      # Serve static files
+mac dev localhost 8080            # Open in browser
+
+# Utilities
+mac dev uuid                      # Generate UUID for a new component
+mac dev password 24               # Generate API key
+mac dev json-format config.json   # Fix messy JSON
+```
+
+### Troubleshooting Networking
+
+```bash
+mac network status                # Full network overview
+mac network ip                    # Local IP
+mac network public-ip             # External IP and location
+mac network ping google.com       # Test connectivity
+mac network speed-test            # Measure download speed
+mac network dns-flush             # Fix DNS issues (sudo)
+mac network renew-dhcp            # Get fresh IP (sudo)
+mac wifi info                     # Detailed WiFi connection
+```
+
+### System Cleanup
+
+```bash
+# Preview first
+mac cleanup --dry-run             # See what would be deleted
+
+# Run cleanup
+mac system cleanup                # Interactive (prompts before proceeding)
+mac system cleanup -y             # No confirmation prompt
+
+# Check before and after
+mac system disk-usage             # See disk usage before
+mac system cleanup -y             # Clean caches, logs, trash, temp files
+mac system disk-usage             # See disk usage after
+```
+
+### Dock Customization
+
+```bash
+mac dock position left            # Side dock for more screen space
+mac dock autohide on              # Auto-hide for maximum space
+mac dock size small               # Compact icons
+mac dock magnification on         # Enlarge on hover
+mac dock magnification-size 96    # Moderate magnification
+mac dock add "Visual Studio Code" # Add your editor
+mac dock remove "Chess"           # Remove unused apps
+mac dock status                   # Verify settings
+```
+
+### Screenshot Configuration
+
+```bash
+mac screenshot location ~/Pictures/Screenshots  # Custom save path
+mac screenshot format png       # Best quality
+mac screenshot shadow off       # Clean window captures
+mac screenshot cursor hide      # No cursor in shots
+mac screenshot naming timestamp # Timestamped filenames
+mac screenshot thumbnail off    # No floating preview
+mac screenshot status           # Verify all settings
 ```
 
 ---
