@@ -20,7 +20,7 @@ mac <category> <action> [arguments] [flags]
   - [audio](#audio--audio-control--device-management)
   - [bluetooth](#bluetooth--bluetooth-control--device-management)
   - [dev](#dev--developer-tools--utilities)
-  - [display](#display--display--appearance-settings)
+  - [power](#power--power-user-toggles)  - [display](#display--display--appearance-settings)
   - [dock](#dock--dock-management)
   - [finder](#finder--file-visibility--finder-management)
   - [network](#network--network-information--troubleshooting)
@@ -335,6 +335,43 @@ mac dev timestamp                 # Current unix timestamp
 mac dev timestamp 1712592000      # Convert timestamp to readable date
 mac dev timestamp "2026-04-08"    # Convert date string to unix timestamp
 ```
+
+---
+
+### power -- Power User Toggles
+
+Developer-focused system toggles that most users don't know about. Every command follows the same pattern: show state with no args, set with `on`/`off`, flip with `toggle`.
+
+```bash
+$ mac power status                    # Show all 20 toggles at a glance
+$ mac power caffeinate on             # Prevent system sleep
+$ mac power hidden-files toggle       # Toggle hidden files in Finder
+$ mac power gatekeeper off            # Allow apps from anywhere (requires sudo)
+```
+
+| Command | Description | Sudo |
+|---------|-------------|------|
+| `status` | Show all toggles and their current state | No |
+| `caffeinate` | Prevent system/display sleep (background process) | No |
+| `hidden-files` | Show hidden files in Finder | No |
+| `file-extensions` | Show all file extensions | No |
+| `desktop-icons` | Show icons on desktop | No |
+| `gatekeeper` | Allow apps from unidentified developers | Yes |
+| `crash-reporter` | Show crash dialog (vs silent) | No |
+| `function-keys` | Use F1-F12 as standard function keys | No |
+| `spotlight-indexing` | Enable/disable Spotlight indexing | Yes |
+| `key-repeat` | Fast key repeat rate (2x default) | No |
+| `smooth-scrolling` | Smooth scrolling animation | No |
+| `animations` | Window open/close animations | No |
+| `transparency` | Reduce UI transparency | No |
+| `dock-bounce` | Dock bounce animation on launch | No |
+| `firewall-stealth` | Firewall stealth mode (no ping) | Yes |
+| `remote-login` | SSH remote login server | Yes |
+| `quarantine` | File quarantine warnings on downloads | No |
+| `developer-dir` | Xcode developer tools path | Yes |
+| `login-items` | Show login window items | No |
+| `save-panel` | Expanded save dialogs by default | No |
+| `print-dialog` | Expanded print dialogs by default | No |
 
 ---
 
