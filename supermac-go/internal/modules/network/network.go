@@ -67,8 +67,8 @@ func (n *NetworkModule) Commands() []module.Command {
 			Run:         n.interfaces,
 		},
 		{
-			Name:        "status",
-			Description: "Comprehensive network status overview",
+									Name:        "status",
+			Aliases:     []string{"info"},
 			Run:         n.status,
 		},
 		{

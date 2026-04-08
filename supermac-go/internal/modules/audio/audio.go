@@ -71,16 +71,16 @@ func (a *AudioModule) Commands() []module.Command {
 			Run: a.devices,
 		},
 		{
-			Name:        "input-device",
-			Description: "Set audio input device",
+						Name:        "input-device",
+			Aliases:     []string{"input"},
 			Args: []module.Arg{
 				{Name: "name", Required: true, Description: "Device name"},
 			},
 			Run: a.inputDevice,
 		},
 		{
-			Name:        "output-device",
-			Description: "Set audio output device",
+						Name:        "output-device",
+			Aliases:     []string{"output"},
 			Args: []module.Arg{
 				{Name: "name", Required: true, Description: "Device name"},
 			},

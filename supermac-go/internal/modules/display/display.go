@@ -30,7 +30,8 @@ func (d *DisplayModule) Commands() []module.Command {
 			Run: d.brightness,
 		},
 		{
-			Name:        "dark-mode",
+						Name:        "dark-mode",
+			Aliases:     []string{"light-mode", "toggle-mode"},
 			Description: "Control dark mode (on/off/toggle)",
 			Args: []module.Arg{
 				{Name: "action", Required: true, Description: "on, off, or toggle"},
