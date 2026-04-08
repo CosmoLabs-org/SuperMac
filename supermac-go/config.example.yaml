@@ -1,0 +1,29 @@
+# SuperMac Configuration
+# See: https://github.com/cosmolabs-org/supermac
+
+version: 1
+
+output:
+  color: true
+  format: text         # text | json | quiet
+
+updates:
+  check: true
+  channel: stable      # stable | beta
+
+modules:
+  screenshot:
+    location: Desktop  # Save location
+    format: PNG        # PNG | JPG | TIFF | GIF
+    shadow: false      # Include window shadow
+  audio:
+    volume_step: 10    # Volume change per step
+  display:
+    brightness_step: 10 # Brightness change per step
+
+aliases:
+  kp: "dev kill-port"
+  dark: "display dark-mode"
+  light: "display light-mode"
+  ip: "network ip"
+  cleanup: "system cleanup"
