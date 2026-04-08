@@ -11,6 +11,18 @@ import (
 	"github.com/cosmolabs-org/supermac/internal/output"
 	"github.com/cosmolabs-org/supermac/internal/platform"
 	"github.com/cosmolabs-org/supermac/internal/version"
+
+	// Module registrations
+	_ "github.com/cosmolabs-org/supermac/internal/modules/finder"
+	_ "github.com/cosmolabs-org/supermac/internal/modules/dock"
+	_ "github.com/cosmolabs-org/supermac/internal/modules/system"
+	_ "github.com/cosmolabs-org/supermac/internal/modules/wifi"
+	_ "github.com/cosmolabs-org/supermac/internal/modules/network"
+	_ "github.com/cosmolabs-org/supermac/internal/modules/display"
+	_ "github.com/cosmolabs-org/supermac/internal/modules/dev"
+	_ "github.com/cosmolabs-org/supermac/internal/modules/audio"
+	_ "github.com/cosmolabs-org/supermac/internal/modules/screenshot"
+
 	"github.com/spf13/cobra"
 )
 
@@ -237,7 +249,7 @@ func getOutput() output.Writer {
 }
 
 func getPlatform() platform.Interface {
-	return &platform.MockPlatform{} // TODO: replace with DarwinPlatform
+	return &platform.DarwinPlatform{}
 }
 
 func getPrompt() module.PromptInterface {

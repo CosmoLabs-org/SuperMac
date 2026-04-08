@@ -1,0 +1,399 @@
+package network
+
+import (
+	"fmt"
+	"net"
+	"os"
+	"os/exec"
+	"regexp"
+	"strings"
+
+	"github.com/cosmolabs-org/supermac/internal/module"
+)
+
+func init() {
+	module.Register(&NetworkModule{})
+}
+
+type NetworkModule struct{}
+
+func (n *NetworkModule) Name() string            { return "network" }
+func (n *NetworkModule) ShortDescription() string { return "Network information and troubleshooting" }
+func (n *NetworkModule) Emoji() string            { return "📡" }
+
+func (n *NetworkModule) Commands() []module.Command {
+	return []module.Command{
+		{
+			Name:        "ip",
+			Description: "Show local IP address and interface",
+			Run:         n.localIP,
+		},
+		{
+			Name:        "public-ip",
+			Description: "Show public IP address with geolocation",
+			Run:         n.publicIP,
+		},
+		{
+			Name:        "dns-flush",
+			Description: "Clear DNS cache (requires sudo)",
+			Aliases:     []string{"flush-dns"},
+			Run:         n.dnsFlush,
+		},
+		{
+			Name:        "ping",
+			Description: "Ping a host with enhanced output",
+			Args: []module.Arg{
+				{Name: "host", Required: true, Description: "Hostname or IP to ping"},
+			},
+			Flags: []module.Flag{
+				{Name: "count", Shorthand: "c", DefaultValue: "5", Description: "Number of packets"},
+			},
+			Run: n.ping,
+		},
+		{
+			Name:        "ports",
+			Description: "Show listening ports and processes",
+			Run:         n.ports,
+		},
+		{
+			Name:        "reset",
+			Description: "Reset network settings to defaults (requires sudo)",
+			Run:         n.reset,
+		},
+		{
+			Name:        "interfaces",
+			Description: "List network interfaces and status",
+			Run:         n.interfaces,
+		},
+		{
+			Name:        "status",
+			Description: "Comprehensive network status overview",
+			Run:         n.status,
+		},
+	}
+}
+
+func (n *NetworkModule) Search(term string) []module.SearchResult {
+	var results []module.SearchResult
+	for _, cmd := range n.Commands() {
+		if strings.Contains(cmd.Name, term) || strings.Contains(strings.ToLower(cmd.Description), term) {
+			results = append(results, module.SearchResult{
+				Command:     cmd.Name,
+				Description: cmd.Description,
+				Module:      n.Name(),
+			})
+		}
+	}
+	return results
+}
+
+// ---------------------------------------------------------------------------
+// Command implementations
+// ---------------------------------------------------------------------------
+
+func (n *NetworkModule) localIP(ctx *module.Context) error {
+	ip, iface, err := getLocalIP()
+	if err != nil || ip == "" {
+		ctx.Output.Warning("No active network connection found")
+		ctx.Output.Info("Make sure you're connected to WiFi or Ethernet")
+		return module.NewExitError(module.ExitNetwork, "no active network connection")
+	}
+	ctx.Output.Success("Local IP address: %s", ip)
+	ctx.Output.Info("Interface: %s", iface)
+	return nil
+}
+
+func (n *NetworkModule) publicIP(ctx *module.Context) error {
+	ctx.Output.Info("Fetching public IP address...")
+
+	ip, err := fetchPublicIP()
+	if err != nil || ip == "" {
+		ctx.Output.Error("Failed to retrieve public IP address")
+		ctx.Output.Info("Check your internet connection")
+		return module.NewExitError(module.ExitNetwork, fmt.Sprintf("failed to retrieve public IP: %v", err))
+	}
+
+	ctx.Output.Success("Public IP address: %s", ip)
+
+	// Show geolocation if available
+	if city, country, isp, locErr := fetchIPLocation(ip); locErr == nil {
+		if city != "" && country != "" {
+			fmt.Printf("  Location: %s, %s\n", city, country)
+		}
+		if isp != "" {
+			fmt.Printf("  ISP:      %s\n", isp)
+		}
+	}
+	return nil
+}
+
+func (n *NetworkModule) dnsFlush(ctx *module.Context) error {
+	ctx.Output.Info("Flushing DNS cache...")
+	if err := ctx.Platform.FlushDNS(); err != nil {
+		return module.NewExitError(module.ExitPermission, fmt.Sprintf("failed to flush DNS: %v", err))
+	}
+	ctx.Output.Success("DNS cache cleared successfully")
+	ctx.Output.Info("This can resolve DNS-related connectivity issues")
+	return nil
+}
+
+func (n *NetworkModule) ping(ctx *module.Context) error {
+	if len(ctx.Args) == 0 {
+		return module.NewExitError(module.ExitUsage, "Host required: mac network ping <host>")
+	}
+
+	host := ctx.Args[0]
+	count := ctx.Flags["count"]
+	if count == "" {
+		count = "5"
+	}
+
+	ctx.Output.Info("Pinging %s (%s packets)...", host, count)
+	fmt.Println()
+
+	cmd := exec.Command("ping", "-c", count, host)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		fmt.Println()
+		ctx.Output.Error("Ping failed - host may be unreachable")
+		return module.NewExitError(module.ExitNetwork, fmt.Sprintf("ping to %s failed", host))
+	}
+
+	fmt.Println()
+	ctx.Output.Success("Ping completed successfully")
+	return nil
+}
+
+func (n *NetworkModule) ports(ctx *module.Context) error {
+	ctx.Output.Header("Listening Ports")
+
+	cmd := exec.Command("lsof", "-i", "-P", "-n", "-sTCP:LISTEN")
+	out, err := cmd.Output()
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("failed to list ports: %v", err))
+	}
+
+	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+	if len(lines) == 0 {
+		ctx.Output.Info("No listening ports found")
+		return nil
+	}
+
+	// Parse and display as table
+	var rows [][]string
+	for _, line := range lines {
+		fields := strings.Fields(line)
+		if len(fields) < 9 {
+			continue
+		}
+		rows = append(rows, []string{fields[0], fields[1], fields[8]})
+	}
+
+	if len(rows) > 0 {
+		ctx.Output.Table([]string{"Process", "PID", "Address"}, rows)
+	}
+	return nil
+}
+
+func (n *NetworkModule) reset(ctx *module.Context) error {
+	ctx.Output.Warning("This will reset all network settings to defaults")
+
+	confirmed, err := ctx.Prompt.Confirm("Are you sure you want to reset network settings?")
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("prompt failed: %v", err))
+	}
+	if !confirmed {
+		ctx.Output.Info("Network reset cancelled")
+		return nil
+	}
+
+	ctx.Output.Info("Resetting network settings...")
+	if err := ctx.Platform.ResetNetwork(); err != nil {
+		return module.NewExitError(module.ExitPermission, fmt.Sprintf("failed to reset network: %v", err))
+	}
+
+	ctx.Output.Success("Network settings reset")
+	ctx.Output.Warning("You may need to reconfigure WiFi networks and other settings")
+	ctx.Output.Info("Consider restarting your Mac for a complete reset")
+	return nil
+}
+
+func (n *NetworkModule) interfaces(ctx *module.Context) error {
+	ctx.Output.Header("Network Interfaces")
+
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("failed to list interfaces: %v", err))
+	}
+
+	var rows [][]string
+	for _, iface := range interfaces {
+		status := "down"
+		if iface.Flags&net.FlagUp != 0 {
+			status = "up"
+		}
+
+		addrs, _ := iface.Addrs()
+		addrStr := "-"
+		if len(addrs) > 0 {
+			addrStr = addrs[0].String()
+		}
+
+		rows = append(rows, []string{iface.Name, status, fmt.Sprintf("%d", iface.MTU), addrStr})
+	}
+
+	ctx.Output.Table([]string{"Interface", "Status", "MTU", "Address"}, rows)
+	return nil
+}
+
+func (n *NetworkModule) status(ctx *module.Context) error {
+	ctx.Output.Header("Network Status")
+	fmt.Println()
+
+	// Local IP and interface
+	ip, iface, err := getLocalIP()
+	if err != nil || ip == "" {
+		fmt.Println("  Local IP:   Not connected")
+	} else {
+		fmt.Printf("  Local IP:   %s\n", ip)
+		fmt.Printf("  Interface:  %s\n", iface)
+	}
+
+	// Gateway
+	if gw := getGateway(); gw != "" {
+		fmt.Printf("  Gateway:    %s\n", gw)
+	}
+
+	// DNS servers
+	if dns := getDNSServers(); len(dns) > 0 {
+		fmt.Printf("  DNS:        %s\n", strings.Join(dns, ", "))
+	}
+
+	// Public IP (best effort)
+	ctx.Output.Info("Fetching public IP...")
+	if pubIP, pubErr := fetchPublicIP(); pubErr == nil && pubIP != "" {
+		fmt.Printf("  Public IP:  %s\n", pubIP)
+	}
+
+	fmt.Println()
+	ctx.Output.Info("Use 'mac network interfaces' for detailed interface list")
+	ctx.Output.Info("Use 'mac network ports' for listening port details")
+	return nil
+}
+
+// ---------------------------------------------------------------------------
+// Helper functions
+// ---------------------------------------------------------------------------
+
+// interfaces to probe for a local IP address.
+var probeInterfaces = []string{"en0", "en1", "en2", "en3"}
+
+// getLocalIP returns the first active IPv4 address and the interface it was found on.
+func getLocalIP() (ipAddr, iface string, err error) {
+	for _, name := range probeInterfaces {
+		out, err := exec.Command("ipconfig", "getifaddr", name).Output()
+		if err != nil {
+			continue
+		}
+		candidate := strings.TrimSpace(string(out))
+		if candidate != "" && net.ParseIP(candidate) != nil {
+			return candidate, name, nil
+		}
+	}
+	return "", "", fmt.Errorf("no active interface")
+}
+
+// fetchPublicIP tries multiple public IP services and returns the first valid result.
+func fetchPublicIP() (string, error) {
+	services := []string{
+		"https://ifconfig.me",
+		"https://ipinfo.io/ip",
+		"https://api.ipify.org",
+		"https://checkip.amazonaws.com",
+	}
+
+	ipPattern := regexp.MustCompile(`^(\d{1,3}\.){3}\d{1,3}$`)
+
+	for _, svc := range services {
+		out, err := exec.Command("curl", "-s", "--connect-timeout", "10", svc).Output()
+		if err != nil {
+			continue
+		}
+		candidate := strings.TrimSpace(string(out))
+		if ipPattern.MatchString(candidate) {
+			return candidate, nil
+		}
+	}
+	return "", fmt.Errorf("all services failed")
+}
+
+// fetchIPLocation returns city, country, ISP for the given IP using ipinfo.io.
+func fetchIPLocation(ip string) (city, country, isp string, err error) {
+	out, err := exec.Command("curl", "-s", "--connect-timeout", "5",
+		fmt.Sprintf("https://ipinfo.io/%s/json", ip)).Output()
+	if err != nil {
+		return "", "", "", err
+	}
+
+	body := string(out)
+	city = extractJSONValue(body, "city")
+	country = extractJSONValue(body, "country")
+	isp = extractJSONValue(body, "org")
+	return city, country, isp, nil
+}
+
+// extractJSONValue is a minimal JSON field extractor (avoids importing encoding/json
+// for a simple two-field lookup from a known API shape).
+func extractJSONValue(body, key string) string {
+	pattern := regexp.MustCompile(`"` + key + `"\s*:\s*"([^"]*)"`)
+	matches := pattern.FindStringSubmatch(body)
+	if len(matches) < 2 {
+		return ""
+	}
+	return matches[1]
+}
+
+// getGateway returns the default route gateway.
+func getGateway() string {
+	out, err := exec.Command("route", "-n", "get", "default").Output()
+	if err != nil {
+		return ""
+	}
+	for _, line := range strings.Split(string(out), "\n") {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "gateway:") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "gateway:"))
+		}
+	}
+	return ""
+}
+
+// getDNSServers returns up to 3 DNS nameserver addresses.
+func getDNSServers() []string {
+	out, err := exec.Command("scutil", "--dns").Output()
+	if err != nil {
+		return nil
+	}
+
+	seen := map[string]bool{}
+	var servers []string
+	for _, line := range strings.Split(string(out), "\n") {
+		line = strings.TrimSpace(line)
+		if !strings.HasPrefix(line, "nameserver") {
+			continue
+		}
+		fields := strings.Fields(line)
+		if len(fields) >= 3 {
+			addr := fields[2]
+			if !seen[addr] {
+				seen[addr] = true
+				servers = append(servers, addr)
+				if len(servers) >= 3 {
+					break
+				}
+			}
+		}
+	}
+	return servers
+}
