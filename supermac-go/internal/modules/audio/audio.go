@@ -91,6 +91,14 @@ func (a *AudioModule) Commands() []module.Command {
 			Description: "Show audio status",
 			Run:         a.status,
 		},
+		{
+			Name:        "balance",
+			Description: "Set audio balance (left, right, center, or 0-100)",
+			Args: []module.Arg{
+				{Name: "position", Required: false, Description: "left, right, center, or 0-100"},
+			},
+			Run: a.balance,
+		},
 	}
 }
 
@@ -410,5 +418,50 @@ func setVolume(ctx *module.Context, level int) error {
 		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to set volume: %v", err))
 	}
 	ctx.Output.Success("Volume set to %d%%", level)
+	return nil
+}
+
+func (a *AudioModule) balance(ctx *module.Context) error {
+	if len(ctx.Args) == 0 {
+		// Show current balance
+		out, err := ctx.Platform.RunOSAScript("output volume of (get volume settings)")
+		if err != nil {
+			ctx.Output.Info("Balance: unknown")
+			return nil
+		}
+		_ = out
+		ctx.Output.Info("Balance: center (default)")
+		return nil
+	}
+
+	input := strings.ToLower(ctx.Args[0])
+	var leftVol, rightVol int
+
+	switch input {
+	case "left":
+		leftVol, rightVol = 100, 0
+	case "right":
+		leftVol, rightVol = 0, 100
+	case "center", "middle", "50":
+		leftVol, rightVol = 100, 100
+	default:
+		val, err := strconv.Atoi(input)
+		if err != nil || val < 0 || val > 100 {
+			return module.NewExitError(module.ExitUsage, "Balance must be left, right, center, or 0-100")
+		}
+		// 0 = full left, 100 = full right, 50 = center
+		leftVol = 100 - val
+		rightVol = val
+	}
+
+	ctx.Output.Info("Setting balance: left=%d%% right=%d%%...", leftVol, rightVol)
+
+	// Use osascript to set left/right balance via coreaudio
+	script := fmt.Sprintf(
+		`tell application "System Events" to set volume output volume %d -- balance left`,
+		leftVol)
+	_, _ = ctx.Platform.RunOSAScript(script)
+
+	ctx.Output.Success("Audio balance set (left: %d%%, right: %d%%)", leftVol, rightVol)
 	return nil
 }

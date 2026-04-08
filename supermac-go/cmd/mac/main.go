@@ -57,6 +57,9 @@ func main() {
 	// Register all modules as Cobra subcommands
 	registerModules(rootCmd)
 
+	// Global shortcuts (convenience aliases matching the original Bash CLI)
+	addShortcuts(rootCmd)
+
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
@@ -257,4 +260,79 @@ func getPrompt() module.PromptInterface {
 		return &module.AutoYesPrompt{}
 	}
 	return &module.TerminalPrompt{}
+}
+
+// addShortcuts creates top-level convenience commands that delegate to module subcommands.
+// These mirror the original Bash CLI's global shortcuts.
+func addShortcuts(rootCmd *cobra.Command) {
+	shortcuts := map[string]string{
+		"ip":             "network ip",
+		"cleanup":        "system cleanup",
+		"restart-finder": "finder restart",
+		"kp":             "dev kill-port",
+		"vol":            "audio volume",
+		"dark":           "display dark-mode on",
+		"light":          "display dark-mode off",
+		"search":         "", // special: built-in search
+	}
+
+	for name, target := range shortcuts {
+		if name == "search" {
+			// Search command: find commands by keyword
+			rootCmd.AddCommand(&cobra.Command{
+				Use:   "search <term>",
+				Short: "Search for a command by keyword",
+				Args:  cobra.MinimumNArgs(1),
+				Run: func(cmd *cobra.Command, args []string) {
+					term := strings.ToLower(args[0])
+					w := getOutput()
+					w.Header("Search Results")
+					fmt.Println()
+					found := false
+					for _, mod := range module.All() {
+						for _, r := range mod.Search(term) {
+							fmt.Printf("  %-25s %s (%s)\n", r.Module+" "+r.Command, r.Description, r.Module)
+							found = true
+						}
+					}
+					if !found {
+						fmt.Printf("  No commands found matching '%s'\n", args[0])
+					}
+				},
+			})
+			continue
+		}
+
+		parts := strings.SplitN(target, " ", 2)
+		moduleName := parts[0]
+		subCmd := ""
+		if len(parts) > 1 {
+			subCmd = parts[1]
+		}
+		desc := fmt.Sprintf("Shortcut for: mac %s", target)
+
+		shortcutName := name
+		shortcutModule := moduleName
+		shortcutSubCmd := subCmd
+
+		rootCmd.AddCommand(&cobra.Command{
+			Use:   shortcutName + " [args...]",
+			Short: desc,
+			Run: func(cmd *cobra.Command, args []string) {
+				// Find the module command and its subcommand, then execute
+				for _, c := range rootCmd.Commands() {
+					if c.Name() == shortcutModule {
+						for _, sc := range c.Commands() {
+							if sc.Name() == shortcutSubCmd {
+								sc.RunE(sc, args)
+								return
+							}
+						}
+					}
+				}
+				fmt.Fprintf(os.Stderr, "Error: shortcut target 'mac %s' not found\n", shortcutModule+" "+shortcutSubCmd)
+				os.Exit(1)
+			},
+		})
+	}
 }

@@ -81,6 +81,22 @@ func (d *DockModule) Commands() []module.Command {
 			Description: "Reset dock to default settings",
 			Run:         d.reset,
 		},
+		{
+			Name:        "add",
+			Description: "Add application to dock (requires dockutil)",
+			Args: []module.Arg{
+				{Name: "app", Required: true, Description: "Application name or path"},
+			},
+			Run: d.add,
+		},
+		{
+			Name:        "remove",
+			Description: "Remove application from dock (requires dockutil)",
+			Args: []module.Arg{
+				{Name: "app", Required: true, Description: "Application name or path"},
+			},
+			Run: d.remove,
+		},
 	}
 }
 
@@ -448,4 +464,47 @@ func stateString(on bool) string {
 		return "enabled"
 	}
 	return "disabled"
+}
+
+func (d *DockModule) add(ctx *module.Context) error {
+	if len(ctx.Args) == 0 {
+		return module.NewExitError(module.ExitUsage, "App required: mac dock add <app>")
+	}
+	app := ctx.Args[0]
+
+	// Check dockutil is available
+	if _, err := exec.LookPath("dockutil"); err != nil {
+		return module.NewExitError(module.ExitNotFound,
+			"dockutil is required. Install with: brew install dockutil")
+	}
+
+	ctx.Output.Info("Adding %s to dock...", app)
+	out, err := exec.Command("dockutil", "--add", app).CombinedOutput()
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to add: %s", strings.TrimSpace(string(out))))
+	}
+	restartDock(ctx)
+	ctx.Output.Success("Added %s to dock", app)
+	return nil
+}
+
+func (d *DockModule) remove(ctx *module.Context) error {
+	if len(ctx.Args) == 0 {
+		return module.NewExitError(module.ExitUsage, "App required: mac dock remove <app>")
+	}
+	app := ctx.Args[0]
+
+	if _, err := exec.LookPath("dockutil"); err != nil {
+		return module.NewExitError(module.ExitNotFound,
+			"dockutil is required. Install with: brew install dockutil")
+	}
+
+	ctx.Output.Info("Removing %s from dock...", app)
+	out, err := exec.Command("dockutil", "--remove", app).CombinedOutput()
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to remove: %s", strings.TrimSpace(string(out))))
+	}
+	restartDock(ctx)
+	ctx.Output.Success("Removed %s from dock", app)
+	return nil
 }

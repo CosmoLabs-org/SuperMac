@@ -54,6 +54,27 @@ func (s *SystemModule) Commands() []module.Command {
 			Description: "Hardware information and specs",
 			Run:         s.hardware,
 		},
+		{
+			Name:        "disk-usage",
+			Description: "Disk usage analysis by directory",
+			Args: []module.Arg{
+				{Name: "path", Required: false, Description: "Directory to analyze (default: home)"},
+			},
+			Run: s.diskUsage,
+		},
+		{
+			Name:        "processes",
+			Description: "Top processes by resource usage (cpu or memory)",
+			Args: []module.Arg{
+				{Name: "sort", Required: false, Description: "Sort by: cpu (default) or memory"},
+			},
+			Run: s.processes,
+		},
+		{
+			Name:        "uptime",
+			Description: "System uptime with details",
+			Run:         s.uptime,
+		},
 	}
 }
 
@@ -335,6 +356,143 @@ func (s *SystemModule) hardware(ctx *module.Context) error {
 	fmt.Printf("  OS Version:  %s\n", info.OSVersion)
 	fmt.Printf("  Build:       %s\n", info.Build)
 	fmt.Printf("  Arch:        %s\n", info.Arch)
+
+	return nil
+}
+
+// ============================================================================
+// Disk Usage
+// ============================================================================
+
+func (s *SystemModule) diskUsage(ctx *module.Context) error {
+	target := os.Getenv("HOME")
+	if len(ctx.Args) > 0 {
+		target = ctx.Args[0]
+	}
+
+	info, err := os.Stat(target)
+	if err != nil || !info.IsDir() {
+		return module.NewExitError(module.ExitNotFound, fmt.Sprintf("Directory not found: %s", target))
+	}
+
+	ctx.Output.Header("Disk Usage: " + target)
+
+	// Volume info
+	dfOut, err := runCmd("df", "-h", target)
+	if err == nil {
+		lines := strings.Split(dfOut, "\n")
+		if len(lines) >= 2 {
+			fields := strings.Fields(lines[1])
+			if len(fields) >= 6 {
+				fmt.Printf("  Volume:     %s\n", fields[0])
+				fmt.Printf("  Total:      %s\n", fields[1])
+				fmt.Printf("  Used:       %s\n", fields[2])
+				fmt.Printf("  Available:  %s\n", fields[3])
+				fmt.Printf("  Usage:      %s\n", fields[4])
+			}
+		}
+	}
+
+	fmt.Println()
+	ctx.Output.Info("Largest directories:")
+
+	// du -sh on children, sorted by size
+	out, err := runCmd("sh", "-c", fmt.Sprintf("du -sh %s/* 2>/dev/null | sort -hr | head -10", target))
+	if err == nil {
+		for _, line := range strings.Split(out, "\n") {
+			if line == "" {
+				continue
+			}
+			parts := strings.SplitN(line, "\t", 2)
+			if len(parts) == 2 {
+				fmt.Printf("  %-10s %s\n", parts[0], filepath.Base(parts[1]))
+			}
+		}
+	}
+
+	return nil
+}
+
+// ============================================================================
+// Processes
+// ============================================================================
+
+func (s *SystemModule) processes(ctx *module.Context) error {
+	sortBy := "cpu"
+	if len(ctx.Args) > 0 {
+		sortBy = strings.ToLower(ctx.Args[0])
+	}
+
+	switch sortBy {
+	case "cpu":
+		ctx.Output.Header("Top Processes (by CPU)")
+	case "memory", "mem":
+		ctx.Output.Header("Top Processes (by Memory)")
+	default:
+		return module.NewExitError(module.ExitUsage, "Unknown sort option. Use: cpu, memory")
+	}
+
+	fmt.Println()
+	fmt.Printf("  %-20s %8s %8s %8s\n", "PROCESS", "CPU%", "MEM%", "PID")
+	fmt.Println(strings.Repeat("-", 50))
+
+	sortField := "-k3"
+	if sortBy == "memory" || sortBy == "mem" {
+		sortField = "-k4"
+	}
+	out, err := runCmd("sh", "-c", fmt.Sprintf("ps aux | sort -nr %s | head -15", sortField))
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, "Failed to list processes")
+	}
+
+	for _, line := range strings.Split(out, "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 11 || fields[0] == "USER" {
+			continue
+		}
+		cmdName := filepath.Base(fields[10])
+		fmt.Printf("  %-20s %8s %8s %8s\n", cmdName, fields[2], fields[3], fields[1])
+	}
+
+	return nil
+}
+
+// ============================================================================
+// Uptime
+// ============================================================================
+
+func (s *SystemModule) uptime(ctx *module.Context) error {
+	ctx.Output.Header("System Uptime")
+
+	out, err := runCmd("uptime")
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, "Failed to get uptime")
+	}
+
+	fmt.Println()
+	if parts := strings.Split(out, "up "); len(parts) > 1 {
+		uptimePart := parts[1]
+		if loadParts := strings.Split(uptimePart, ", load"); len(loadParts) > 0 {
+			fmt.Printf("  Up since:    %s\n", strings.TrimSpace(strings.TrimRight(loadParts[0], ",")))
+		}
+	}
+
+	// Users
+	for _, p := range strings.Split(out, ", ") {
+		if strings.HasSuffix(p, "users") || strings.HasSuffix(p, "user") {
+			fmt.Printf("  Users:       %s\n", strings.TrimSpace(p))
+		}
+	}
+
+	// Load averages
+	if parts := strings.Split(out, "load averages: "); len(parts) > 1 {
+		loadFields := strings.Fields(strings.TrimSpace(parts[1]))
+		if len(loadFields) >= 3 {
+			fmt.Println()
+			fmt.Printf("  Load avg:    1m: %s  5m: %s  15m: %s\n",
+				loadFields[0], loadFields[1], loadFields[2])
+		}
+	}
 
 	return nil
 }

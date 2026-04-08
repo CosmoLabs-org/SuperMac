@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
@@ -82,6 +83,30 @@ func (s *ScreenshotModule) Commands() []module.Command {
 			Name:        "status",
 			Description: "Show current screenshot settings",
 			Run:         s.status,
+		},
+		{
+			Name:        "thumbnail",
+			Description: "Toggle screenshot thumbnail preview",
+			Args: []module.Arg{
+				{Name: "action", Required: false, Description: "on, off, or toggle"},
+			},
+			Run: s.thumbnail,
+		},
+		{
+			Name:        "sound",
+			Description: "Toggle screenshot camera shutter sound",
+			Args: []module.Arg{
+				{Name: "action", Required: false, Description: "on, off, or toggle"},
+			},
+			Run: s.sound,
+		},
+		{
+			Name:        "take",
+			Description: "Take a screenshot now (area, window, or screen)",
+			Args: []module.Arg{
+				{Name: "type", Required: false, Description: "area (default), window, or screen"},
+			},
+			Run: s.take,
 		},
 		{
 			Name:        "reset",
@@ -436,6 +461,150 @@ func (s *ScreenshotModule) reset(ctx *module.Context) error {
 	restartSystemUI(ctx)
 	ctx.Output.Success("Screenshot settings reset to defaults")
 	ctx.Output.Info("Screenshots will now save to Desktop in PNG format")
+	return nil
+}
+
+// --- Thumbnail ---
+
+func (s *ScreenshotModule) thumbnail(ctx *module.Context) error {
+	if len(ctx.Args) == 0 {
+		val, err := readSetting(ctx, "include-thumbnail")
+		if err != nil || val == "" {
+			ctx.Output.Info("Thumbnail preview: enabled (default)")
+		} else if isTrue(val) {
+			ctx.Output.Info("Thumbnail preview: enabled")
+		} else {
+			ctx.Output.Info("Thumbnail preview: disabled")
+		}
+		return nil
+	}
+
+	action := strings.ToLower(ctx.Args[0])
+	current, _ := readSetting(ctx, "include-thumbnail")
+	currentOn := isTrue(current)
+
+	var newVal string
+	switch action {
+	case "on":
+		newVal = "1"
+	case "off":
+		newVal = "0"
+	case "toggle":
+		if currentOn {
+			newVal = "0"
+		} else {
+			newVal = "1"
+		}
+	default:
+		return module.NewExitError(module.ExitUsage, "Usage: mac screenshot thumbnail [on|off|toggle]")
+	}
+
+	ctx.Output.Info("Setting thumbnail preview to %s...", newVal)
+	if err := writeSetting(ctx, "include-thumbnail", "-bool "+newVal); err != nil {
+		return err
+	}
+	restartSystemUI(ctx)
+	if newVal == "1" {
+		ctx.Output.Success("Thumbnail preview enabled")
+	} else {
+		ctx.Output.Success("Thumbnail preview disabled")
+	}
+	return nil
+}
+
+// --- Sound ---
+
+func (s *ScreenshotModule) sound(ctx *module.Context) error {
+	if len(ctx.Args) == 0 {
+		soundVal, soundErr := ctx.Platform.ReadDefault(domain, "disable-sound")
+		if soundErr != nil || soundVal == "" {
+			ctx.Output.Info("Camera sound: enabled (default)")
+		} else if isTrue(soundVal) {
+			ctx.Output.Info("Camera sound: disabled")
+		} else {
+			ctx.Output.Info("Camera sound: enabled")
+		}
+		_ = soundErr
+		return nil
+	}
+
+	action := strings.ToLower(ctx.Args[0])
+	soundVal, _ := ctx.Platform.ReadDefault(domain, "disable-sound")
+	currentDisabled := isTrue(soundVal)
+
+	var newVal string
+	switch action {
+	case "on":
+		newVal = "0" // disable-sound = 0 means sound ON
+	case "off":
+		newVal = "1"
+	case "toggle":
+		if currentDisabled {
+			newVal = "0"
+		} else {
+			newVal = "1"
+		}
+	default:
+		return module.NewExitError(module.ExitUsage, "Usage: mac screenshot sound [on|off|toggle]")
+	}
+
+	ctx.Output.Info("Setting camera sound...")
+	if err := ctx.Platform.WriteDefault(domain, "disable-sound", "-bool "+newVal); err != nil {
+		return err
+	}
+	restartSystemUI(ctx)
+	if newVal == "0" {
+		ctx.Output.Success("Camera shutter sound enabled")
+	} else {
+		ctx.Output.Success("Camera shutter sound disabled")
+	}
+	return nil
+}
+
+// --- Take ---
+
+func (s *ScreenshotModule) take(ctx *module.Context) error {
+	captureType := "area"
+	if len(ctx.Args) > 0 {
+		captureType = strings.ToLower(ctx.Args[0])
+	}
+
+	loc, _ := readSetting(ctx, "location")
+	if loc == "" {
+		loc, _ = os.UserHomeDir()
+		loc = filepath.Join(loc, "Desktop")
+	}
+
+	timestamp := fmt.Sprintf("%d", time.Now().Unix())
+	filename := filepath.Join(loc, fmt.Sprintf("Screenshot %s.png", timestamp))
+
+	switch captureType {
+	case "screen", "fullscreen":
+		ctx.Output.Info("Taking full screen screenshot...")
+		if err := exec.Command("screencapture", "-x", filename).Run(); err != nil {
+			return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to take screenshot: %v", err))
+		}
+		ctx.Output.Success("Full screen screenshot taken!")
+
+	case "area", "selection":
+		ctx.Output.Info("Select area for screenshot (press Space for window mode)...")
+		if err := exec.Command("screencapture", "-i", filename).Run(); err != nil {
+			return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to take screenshot: %v", err))
+		}
+		ctx.Output.Success("Area screenshot taken!")
+
+	case "window":
+		ctx.Output.Info("Click on a window to capture...")
+		if err := exec.Command("screencapture", "-i", "-w", filename).Run(); err != nil {
+			return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to take screenshot: %v", err))
+		}
+		ctx.Output.Success("Window screenshot taken!")
+
+	default:
+		return module.NewExitError(module.ExitUsage, "Invalid type. Use: area, window, or screen")
+	}
+
+	ctx.Output.Info("Saved to: %s", filename)
 	return nil
 }
 

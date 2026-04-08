@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
@@ -69,6 +70,22 @@ func (n *NetworkModule) Commands() []module.Command {
 			Name:        "status",
 			Description: "Comprehensive network status overview",
 			Run:         n.status,
+		},
+		{
+			Name:        "speed-test",
+			Description: "Quick network speed test (download via curl)",
+			Run:         n.speedTest,
+		},
+		{
+			Name:        "renew-dhcp",
+			Description: "Renew DHCP lease on primary interface",
+			Run:         n.renewDHCP,
+		},
+		{
+			Name:        "locations",
+			Description: "List network locations and show current",
+			Aliases:     []string{"loc"},
+			Run:         n.locations,
 		},
 	}
 }
@@ -396,4 +413,108 @@ func getDNSServers() []string {
 		}
 	}
 	return servers
+}
+
+func (n *NetworkModule) speedTest(ctx *module.Context) error {
+	ctx.Output.Header("Network Speed Test")
+	fmt.Println()
+	ctx.Output.Info("Downloading test file from Cloudflare...")
+
+	start := time.Now()
+	out, err := exec.Command("curl", "-o", "/dev/null", "-s", "-w",
+		"%{speed_download} %{size_download} %{time_total}",
+		"https://speed.cloudflare.com/__down?bytes=10000000").Output()
+
+	if err != nil {
+		ctx.Output.Info("Cloudflare test failed, trying basic connectivity...")
+		err = exec.Command("curl", "-o", "/dev/null", "-s", "https://google.com").Run()
+		elapsed := time.Since(start)
+		if err != nil {
+			return module.NewExitError(module.ExitGeneral, "Network appears to be down")
+		}
+		ctx.Output.Success("Network is up (response in %s)", elapsed.Round(time.Millisecond))
+		return nil
+	}
+
+	parts := strings.Fields(string(out))
+	if len(parts) >= 1 {
+		var speedBytes float64
+		fmt.Sscanf(parts[0], "%f", &speedBytes)
+		speedMbps := speedBytes * 8 / 1000000
+		elapsed := time.Since(start)
+
+		fmt.Printf("  Download:    %.1f Mbps\n", speedMbps)
+		fmt.Printf("  Time:        %s\n", elapsed.Round(time.Millisecond))
+		fmt.Println()
+		switch {
+		case speedMbps > 100:
+			ctx.Output.Success("Fast connection (%.0f Mbps)", speedMbps)
+		case speedMbps > 30:
+			ctx.Output.Success("Good connection (%.0f Mbps)", speedMbps)
+		case speedMbps > 10:
+			ctx.Output.Info("Moderate speed (%.0f Mbps)", speedMbps)
+		default:
+			ctx.Output.Warning("Slow connection (%.0f Mbps)", speedMbps)
+		}
+	}
+	return nil
+}
+
+func (n *NetworkModule) renewDHCP(ctx *module.Context) error {
+	iface := "en0"
+	if len(ctx.Args) > 0 {
+		iface = ctx.Args[0]
+	}
+
+	ctx.Output.Info("Renewing DHCP lease on %s...", iface)
+	out, err := exec.Command("sudo", "-n", "ipconfig", "set", iface, "DHCP").CombinedOutput()
+	if err != nil {
+		if strings.Contains(string(out), "sudo") {
+			return module.NewExitError(module.ExitGeneral,
+				"Admin privileges required. Run: sudo mac network renew-dhcp")
+		}
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed: %s", strings.TrimSpace(string(out))))
+	}
+
+	ip, _, err := getLocalIP()
+	if err == nil {
+		ctx.Output.Success("DHCP renewed. New IP: %s", ip)
+	} else {
+		ctx.Output.Success("DHCP lease renewed on %s", iface)
+	}
+	return nil
+}
+
+func (n *NetworkModule) locations(ctx *module.Context) error {
+	ctx.Output.Header("Network Locations")
+
+	out, err := exec.Command("networksetup", "-listlocations").Output()
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, "Failed to list network locations")
+	}
+
+	current, _ := exec.Command("networksetup", "-getcurrentlocation").Output()
+	currentLoc := strings.TrimSpace(string(current))
+
+	fmt.Println()
+	for _, loc := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+		loc = strings.TrimSpace(loc)
+		if loc == "" {
+			continue
+		}
+		marker := "  "
+		if loc == currentLoc {
+			marker = "* "
+		}
+		fmt.Printf("  %s%s\n", marker, loc)
+	}
+
+	if currentLoc != "" {
+		fmt.Println()
+		ctx.Output.Info("Current: %s", currentLoc)
+	}
+
+	fmt.Println()
+	ctx.Output.Info("Switch with: sudo networksetup -switchtolocation <name>")
+	return nil
 }

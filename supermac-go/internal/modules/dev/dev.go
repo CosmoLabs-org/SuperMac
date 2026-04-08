@@ -2,6 +2,7 @@ package dev
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"os"
@@ -96,6 +97,42 @@ func (d *DevModule) Commands() []module.Command {
 			Name:        "env",
 			Description: "Show development environment info",
 			Run:         d.env,
+		},
+		{
+			Name:        "json-format",
+			Description: "Pretty-print a JSON file in-place",
+			Aliases:     []string{"jf"},
+			Args: []module.Arg{
+				{Name: "file", Required: true, Description: "JSON file to format"},
+			},
+			Run: d.jsonFormat,
+		},
+		{
+			Name:        "base64-encode",
+			Description: "Base64 encode text (copies to clipboard)",
+			Aliases:     []string{"b64e"},
+			Args: []module.Arg{
+				{Name: "text", Required: true, Description: "Text to encode"},
+			},
+			Run: d.base64Encode,
+		},
+		{
+			Name:        "base64-decode",
+			Description: "Base64 decode text (copies to clipboard)",
+			Aliases:     []string{"b64d"},
+			Args: []module.Arg{
+				{Name: "text", Required: true, Description: "Base64 string to decode"},
+			},
+			Run: d.base64Decode,
+		},
+		{
+			Name:        "password",
+			Description: "Generate a secure random password (copies to clipboard)",
+			Aliases:     []string{"pw"},
+			Args: []module.Arg{
+				{Name: "length", Required: false, Description: "Password length (default: 20)"},
+			},
+			Run: d.password,
 		},
 	}
 }
@@ -700,4 +737,102 @@ func truncate(s string, maxLen int) string {
 		return s[:maxLen]
 	}
 	return s[:maxLen-3] + "..."
+}
+
+// --- JSON Format ---
+
+func (d *DevModule) jsonFormat(ctx *module.Context) error {
+	if len(ctx.Args) == 0 {
+		return module.NewExitError(module.ExitUsage, "File required: mac dev json-format <file.json>")
+	}
+	path := ctx.Args[0]
+	if _, err := os.Stat(path); err != nil {
+		return module.NewExitError(module.ExitNotFound, fmt.Sprintf("File not found: %s", path))
+	}
+
+	out, err := exec.Command("python3", "-m", "json.tool", path).Output()
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Invalid JSON in %s", path))
+	}
+
+	if err := os.WriteFile(path, out, 0644); err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Failed to write: %v", err))
+	}
+
+	ctx.Output.Success("Formatted %s", path)
+	return nil
+}
+
+// --- Base64 Encode ---
+
+func (d *DevModule) base64Encode(ctx *module.Context) error {
+	if len(ctx.Args) == 0 {
+		return module.NewExitError(module.ExitUsage, "Text required: mac dev base64-encode <text>")
+	}
+	input := strings.Join(ctx.Args, " ")
+	encoded := base64.StdEncoding.EncodeToString([]byte(input))
+
+	fmt.Println(encoded)
+	// Copy to clipboard
+	_ = exec.Command("pbcopy").Run()
+	pbcopy := exec.Command("pbcopy")
+	pbcopy.Stdin = strings.NewReader(encoded)
+	_ = pbcopy.Run()
+
+	ctx.Output.Success("Copied to clipboard")
+	return nil
+}
+
+// --- Base64 Decode ---
+
+func (d *DevModule) base64Decode(ctx *module.Context) error {
+	if len(ctx.Args) == 0 {
+		return module.NewExitError(module.ExitUsage, "Base64 string required: mac dev base64-decode <string>")
+	}
+	input := ctx.Args[0]
+
+	decoded, err := base64.StdEncoding.DecodeString(input)
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf("Invalid base64: %v", err))
+	}
+
+	fmt.Println(string(decoded))
+	pbcopy := exec.Command("pbcopy")
+	pbcopy.Stdin = strings.NewReader(string(decoded))
+	_ = pbcopy.Run()
+
+	ctx.Output.Success("Copied to clipboard")
+	return nil
+}
+
+// --- Password Generator ---
+
+func (d *DevModule) password(ctx *module.Context) error {
+	length := 20
+	if len(ctx.Args) > 0 {
+		if l, err := strconv.Atoi(ctx.Args[0]); err == nil && l > 0 {
+			length = l
+		}
+	}
+
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,.<>?"
+	buf := make([]byte, length)
+	if _, err := rand.Read(buf); err != nil {
+		return module.NewExitError(module.ExitGeneral, "Failed to generate password")
+	}
+
+	var password strings.Builder
+	for i := 0; i < length; i++ {
+		password.WriteByte(charset[int(buf[i])%len(charset)])
+	}
+
+	result := password.String()
+	fmt.Println(result)
+
+	pbcopy := exec.Command("pbcopy")
+	pbcopy.Stdin = strings.NewReader(result)
+	_ = pbcopy.Run()
+
+	ctx.Output.Success("Password (%d chars) copied to clipboard", length)
+	return nil
 }

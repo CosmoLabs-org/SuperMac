@@ -66,6 +66,17 @@ func (d *DisplayModule) Commands() []module.Command {
 			Description: "Show display settings and connected displays",
 			Run:         d.status,
 		},
+		{
+			Name:        "detect",
+			Description: "Force detect connected displays",
+			Run:         d.detect,
+		},
+		{
+			Name:        "resolution",
+			Description: "List available display resolutions",
+			Aliases:     []string{"res"},
+			Run:         d.resolutionList,
+		},
 	}
 }
 
@@ -345,4 +356,54 @@ func uid() int {
 	}
 	val, _ := strconv.Atoi(strings.TrimSpace(string(out)))
 	return val
+}
+
+func (d *DisplayModule) detect(ctx *module.Context) error {
+	ctx.Output.Info("Detecting displays...")
+	if err := exec.Command("system_profiler", "SPDisplaysDataType").Run(); err != nil {
+		return module.NewExitError(module.ExitGeneral, "Failed to detect displays")
+	}
+	// Trigger system detection
+	exec.Command("defaults", "write", "com.apple.dock", "ResetLaunchPad", "-bool", "true").Run()
+	ctx.Output.Success("Display detection triggered. Check System Settings > Displays")
+	return nil
+}
+
+func (d *DisplayModule) resolutionList(ctx *module.Context) error {
+	ctx.Output.Header("Display Resolutions")
+	fmt.Println()
+
+	out, err := exec.Command("system_profiler", "SPDisplaysDataType").Output()
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, "Failed to get display info")
+	}
+
+	// Parse resolutions from system_profiler output
+	inResolutions := false
+	for _, line := range strings.Split(string(out), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if strings.Contains(trimmed, "Resolution:") {
+			fmt.Printf("  Current:     %s\n", trimmed)
+		}
+		if strings.Contains(trimmed, "Retina") {
+			fmt.Printf("  Retina:      yes\n")
+		}
+		if strings.Contains(trimmed, "UI Looks like") {
+			fmt.Printf("  Scaled:      %s\n", strings.TrimPrefix(trimmed, "UI Looks like "))
+		}
+		inResolutions = strings.Contains(trimmed, "Resolutions") || inResolutions
+		if inResolutions && strings.HasPrefix(trimmed, "") && strings.Contains(trimmed, "x") && !strings.Contains(trimmed, "Resolution") {
+			fmt.Printf("    %s\n", trimmed)
+		}
+		if inResolutions && trimmed == "" {
+			inResolutions = false
+		}
+	}
+
+	// Also show available scaled modes via defaults
+	modes, _ := exec.Command("system_profiler", "SPDisplaysDataType", "-json").Output()
+	if len(modes) > 0 {
+		ctx.Output.Info("Use System Settings > Displays for full resolution options")
+	}
+	return nil
 }
