@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
 
@@ -146,6 +147,8 @@ func (s *ScreenshotModule) Search(term string) []module.SearchResult {
 	}
 	return results
 }
+
+func (s *ScreenshotModule) Dependencies() []dep.Dependency { return nil }
 
 // --- Command implementations ---
 

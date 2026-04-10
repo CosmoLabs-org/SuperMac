@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
 
@@ -94,6 +95,8 @@ func (d *DisplayModule) Search(term string) []module.SearchResult {
 	}
 	return results
 }
+
+func (d *DisplayModule) Dependencies() []dep.Dependency { return nil }
 
 // --- Brightness ---
 

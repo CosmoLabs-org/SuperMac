@@ -2,6 +2,8 @@ package module
 
 import (
 	"testing"
+
+	"github.com/cosmolabs-org/supermac/internal/dep"
 )
 
 type testModule struct {
@@ -15,6 +17,7 @@ func (t *testModule) ShortDescription() string     { return t.desc }
 func (t *testModule) Emoji() string                { return t.emoji }
 func (t *testModule) Commands() []Command          { return nil }
 func (t *testModule) Search(term string) []SearchResult { return nil }
+func (t *testModule) Dependencies() []dep.Dependency   { return nil }
 
 func TestRegisterAndGet(t *testing.T) {
 	// Clear registry for test isolation

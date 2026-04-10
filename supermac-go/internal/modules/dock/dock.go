@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
 
@@ -117,6 +118,12 @@ func (d *DockModule) Search(term string) []module.SearchResult {
 		}
 	}
 	return results
+}
+
+func (d *DockModule) Dependencies() []dep.Dependency {
+	return []dep.Dependency{
+		{Name: "dockutil", Brew: "dockutil", Check: "dockutil", Commands: []string{"add", "remove"}},
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -477,11 +484,7 @@ func (d *DockModule) add(ctx *module.Context) error {
 	}
 	app := ctx.Args[0]
 
-	// Check dockutil is available
-	if _, err := exec.LookPath("dockutil"); err != nil {
-		return module.NewExitError(module.ExitNotFound,
-			"dockutil is required. Install with: brew install dockutil")
-	}
+	// dockutil check handled by framework via Dependencies()
 
 	ctx.Output.Info("Adding %s to dock...", app)
 	out, err := exec.Command("dockutil", "--add", app).CombinedOutput()
@@ -499,10 +502,7 @@ func (d *DockModule) remove(ctx *module.Context) error {
 	}
 	app := ctx.Args[0]
 
-	if _, err := exec.LookPath("dockutil"); err != nil {
-		return module.NewExitError(module.ExitNotFound,
-			"dockutil is required. Install with: brew install dockutil")
-	}
+	// dockutil check handled by framework via Dependencies()
 
 	ctx.Output.Info("Removing %s from dock...", app)
 	out, err := exec.Command("dockutil", "--remove", app).CombinedOutput()

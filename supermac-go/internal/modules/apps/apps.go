@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
 
@@ -85,6 +86,8 @@ func (a *AppsModule) Search(term string) []module.SearchResult {
 	}
 	return results
 }
+
+func (a *AppsModule) Dependencies() []dep.Dependency { return nil }
 
 // ---------------------------------------------------------------------------
 // list — List installed applications

@@ -2,6 +2,7 @@ package module
 
 import (
 	"github.com/cosmolabs-org/supermac/internal/config"
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/output"
 	"github.com/cosmolabs-org/supermac/internal/platform"
 )
@@ -13,6 +14,7 @@ type Module interface {
 	Emoji() string
 	Commands() []Command
 	Search(term string) []SearchResult
+	Dependencies() []dep.Dependency
 }
 
 // Command represents a single action within a module.

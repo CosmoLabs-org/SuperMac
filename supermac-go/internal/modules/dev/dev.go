@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
 
@@ -175,6 +176,8 @@ func (d *DevModule) Search(term string) []module.SearchResult {
 	}
 	return results
 }
+
+func (d *DevModule) Dependencies() []dep.Dependency { return nil }
 
 // ---------------------------------------------------------------------------
 // Command implementations

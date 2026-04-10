@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
 
@@ -30,6 +31,8 @@ type toggleDef struct {
 	restartMsg  string                            // message if logout needed
 	needsSudo   bool
 }
+
+func (p *PowerModule) Dependencies() []dep.Dependency { return nil }
 
 func (p *PowerModule) Commands() []module.Command {
 	cmds := []module.Command{

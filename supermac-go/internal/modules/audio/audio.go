@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 	"github.com/cosmolabs-org/supermac/internal/platform"
 )
@@ -114,6 +115,12 @@ func (a *AudioModule) Search(term string) []module.SearchResult {
 		}
 	}
 	return results
+}
+
+func (a *AudioModule) Dependencies() []dep.Dependency {
+	return []dep.Dependency{
+		{Name: "SwitchAudioSource", Brew: "switchaudio-osx", Check: "SwitchAudioSource", Commands: []string{"input-device", "output-device"}},
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -282,12 +289,6 @@ func (a *AudioModule) devices(ctx *module.Context) error {
 		printDeviceList(ctx, "Input Devices", inputDevs)
 	}
 
-	// Hint about SwitchAudioSource for enhanced switching.
-	if _, err := exec.LookPath("SwitchAudioSource"); err != nil {
-		fmt.Println()
-		ctx.Output.Info("Install SwitchAudioSource for enhanced device switching:")
-		ctx.Output.Info("    brew install switchaudio-osx")
-	}
 	return nil
 }
 
@@ -325,24 +326,15 @@ func (a *AudioModule) outputDevice(ctx *module.Context) error {
 }
 
 func switchDevice(ctx *module.Context, deviceType, name string) error {
-	// Prefer SwitchAudioSource when available.
-	if _, err := exec.LookPath("SwitchAudioSource"); err == nil {
-		ctx.Output.Info("Setting %s device to: %s", deviceType, name)
-		out, err := exec.Command("SwitchAudioSource", "-s", name, "-t", deviceType).CombinedOutput() //nolint:gosec // device name is user-provided, not a security risk
-		if err != nil {
-			return module.NewExitError(module.ExitGeneral, fmt.Sprintf(
-				"Failed to set %s device: %s\nMake sure the device name is correct. Use 'mac audio devices %s' to see available devices.",
-				deviceType, strings.TrimSpace(string(out)), deviceType))
-		}
-		ctx.Output.Success("%s device set to: %s", strings.Title(deviceType), name)
-		return nil
+	ctx.Output.Info("Setting %s device to: %s", deviceType, name)
+	out, err := exec.Command("SwitchAudioSource", "-s", name, "-t", deviceType).CombinedOutput() //nolint:gosec // device name is user-provided, not a security risk
+	if err != nil {
+		return module.NewExitError(module.ExitGeneral, fmt.Sprintf(
+			"Failed to set %s device: %s\nMake sure the device name is correct. Use 'mac audio devices %s' to see available devices.",
+			deviceType, strings.TrimSpace(string(out)), deviceType))
 	}
-
-	// Graceful fallback: try via platform RunCommand if SwitchAudioSource is absent.
-	ctx.Output.Info("SwitchAudioSource not found, attempting fallback...")
-	ctx.Output.Info("Install SwitchAudioSource for reliable device switching: brew install switchaudio-osx")
-	return module.NewExitError(module.ExitNotFound,
-		"SwitchAudioSource is required for device switching. Install with: brew install switchaudio-osx")
+	ctx.Output.Success("%s device set to: %s", strings.Title(deviceType), name)
+	return nil
 }
 
 // ---------------------------------------------------------------------------

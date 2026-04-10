@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
 
@@ -69,6 +70,8 @@ func (f *FinderModule) Search(term string) []module.SearchResult {
 	}
 	return results
 }
+
+func (f *FinderModule) Dependencies() []dep.Dependency { return nil }
 
 func (f *FinderModule) restart(ctx *module.Context) error {
 	ctx.Output.Info("Restarting Finder...")

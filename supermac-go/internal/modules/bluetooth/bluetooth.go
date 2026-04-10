@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
 
@@ -80,14 +81,14 @@ func (b *BluetoothModule) Search(term string) []module.SearchResult {
 	return results
 }
 
-// checkBlueutil verifies blueutil is installed and returns an error if not.
-func checkBlueutil(ctx *module.Context) error {
-	if _, err := exec.LookPath("blueutil"); err != nil {
-		ctx.Output.Warning("blueutil is not installed")
-		ctx.Output.Info("Install it with: brew install blueutil")
-		return module.NewExitError(module.ExitGeneral,
-			"blueutil is required for Bluetooth management. Install with: brew install blueutil")
+func (b *BluetoothModule) Dependencies() []dep.Dependency {
+	return []dep.Dependency{
+		{Name: "blueutil", Brew: "blueutil", Check: "blueutil"},
 	}
+}
+
+// checkBlueutil — dependency checking handled by framework via Dependencies().
+func checkBlueutil(ctx *module.Context) error {
 	return nil
 }
 

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 )
 
@@ -112,6 +113,8 @@ func (s *SystemModule) Search(term string) []module.SearchResult {
 	}
 	return results
 }
+
+func (s *SystemModule) Dependencies() []dep.Dependency { return nil }
 
 // matchesSearch checks whether a command matches the search term by name,
 // description, or any alias.

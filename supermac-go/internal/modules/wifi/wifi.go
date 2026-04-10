@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 	"github.com/cosmolabs-org/supermac/internal/platform"
 )
@@ -106,6 +107,8 @@ func (w *WiFiModule) Search(term string) []module.SearchResult {
 	}
 	return results
 }
+
+func (w *WiFiModule) Dependencies() []dep.Dependency { return nil }
 
 // ---------------------------------------------------------------------------
 // Helpers
