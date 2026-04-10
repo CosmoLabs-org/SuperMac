@@ -1,0 +1,10 @@
+{
+  "project": "SuperMac",
+  "type": "go-cli",
+  "branch": "master",
+  "version": "0.1.2",
+  "language": "go",
+  "build_command": "go build -C supermac-go -o ../mac .",
+  "test_command": "go test -C supermac-go ./...",
+  "lint_command": "shellcheck lib/*.sh mac; go vet -C supermac-go ./..."
+}

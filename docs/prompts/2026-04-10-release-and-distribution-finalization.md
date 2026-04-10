@@ -1,15 +1,20 @@
 ---
-title: "SuperMac — Release Finalization and Distribution Validation"
-created: 2026-04-10
-status: PENDING
-priority: high
 branch: master
-origin: "/continuation-prompt"
-tags: [continuation, distribution, release, ci-cd]
-goals_total: 7
+created: "2026-04-10"
 goals_completed: 0
+goals_total: 7
+origin: /continuation-prompt
+priority: high
 related_prompts:
-  - docs/prompts/2026-04-08-go-modules-complete-distribution-next.md
+    - docs/prompts/2026-04-08-go-modules-complete-distribution-next.md
+started: "2026-04-10"
+status: STARTED
+tags:
+    - continuation
+    - distribution
+    - release
+    - ci-cd
+title: SuperMac — Release Finalization and Distribution Validation
 ---
 
 # SuperMac — Release Finalization and Distribution Validation
@@ -49,7 +54,11 @@ All 5 goals from the previous prompt (`2026-04-08-go-modules-complete-distributi
 
 ## Goals
 
-### [ ] 1. Push to GitHub and verify CI passes
+### [ ] 1. Run /project-init on SuperMac repo
+
+The SuperMac repo was never properly initialized with `/project-init`. Only `.claude/session-end-state.json` exists — no project config, settings, or hooks. Run `/project-init` to set up the `.claude/` directory properly before proceeding with any other work. This should have been done day one.
+
+### [ ] 2. Push to GitHub and verify CI passes
 
 Push master to `origin` and confirm the CI workflow runs green:
 - `git push origin master`
@@ -57,15 +66,15 @@ Push master to `origin` and confirm the CI workflow runs green:
 - Fix any CI failures (common: path issues in working-directory, Go version mismatch, test flakiness on macOS runner)
 - This is the gate — nothing else proceeds until CI is green
 
-### [ ] 2. Create cosmolabs-org/homebrew-tap repository
+### [ ] 3. Create cosmolabs-org/homebrew-tap repository
 
 Set up the Homebrew tap that `brew install cosmolabs-org/tap/supermac` will use:
 - Create repo at `github.com/CosmoLabs-org/homebrew-tap`
 - Clone it locally, add `Formula/supermac.rb` from the SuperMac repo (keep in sync)
-- The formula currently has `sha256 "PLACEHOLDER_UPDATE_ON_RELEASE"` — leave it until Goal 4
+- The formula currently has `sha256 "PLACEHOLDER_UPDATE_ON_RELEASE"` — leave it until Goal 5
 - Add a README explaining `brew install cosmolabs-org/tap/supermac`
 
-### [ ] 3. Tag v0.2.0 and verify release workflow
+### [ ] 4. Tag v0.2.0 and verify release workflow
 
 Trigger the release pipeline and validate its output:
 - `git tag v0.2.0 && git push origin v0.2.0`
@@ -73,7 +82,7 @@ Trigger the release pipeline and validate its output:
 - Verify the GitHub Release page has: `mac-arm64.tar.gz`, `mac-amd64.tar.gz`, `checksums.txt`
 - Download both binaries and smoke-test on local machine: `./mac --version`, `./mac doctor`, `./mac network ip`
 
-### [ ] 4. Update Homebrew formula with real sha256
+### [ ] 5. Update Homebrew formula with real sha256
 
 After the release artifact exists:
 - Download `mac-arm64.tar.gz` from the GitHub Release
@@ -82,7 +91,7 @@ After the release artifact exists:
 - Commit and push to both repos
 - Test: `brew install cosmolabs-org/tap/supermac` on a clean machine (or `brew reinstall`)
 
-### [ ] 5. Test install.sh end-to-end
+### [ ] 6. Test install.sh end-to-end
 
 Validate the curl-able installer:
 - Run `bash install.sh` on the local machine (or a clean macOS environment)
@@ -90,7 +99,7 @@ Validate the curl-able installer:
 - Test with missing dependencies, existing install (upgrade path), and offline scenarios
 - Fix any issues found — install.sh is the primary distribution channel for non-Homebrew users
 
-### [ ] 6. Write USAGE.md update for mac doctor command
+### [ ] 7. Write USAGE.md update for mac doctor command
 
 Document the new dependency system and doctor command:
 - Add `mac doctor` section to `supermac-go/docs/USAGE.md`
@@ -98,7 +107,7 @@ Document the new dependency system and doctor command:
 - Document the dependency system: which modules declare deps, how auto-install prompts work
 - Include example output
 
-### [ ] 7. Update ROAD-019 status
+### [ ] 8. Update ROAD-019 status
 
 Close out the distribution roadmap item:
 - Mark completed deliverables in ROAD-019.yaml
@@ -108,16 +117,17 @@ Close out the distribution roadmap item:
 
 ## Priority Order
 
-1. **Push + CI validation** (Goal 1) — unblocks everything, catches breakage immediately
-2. **Tag v0.2.0 + release workflow** (Goal 3) — produces the artifacts Goals 4-5 depend on
-3. **Homebrew tap + formula** (Goals 2 + 4) — primary distribution channel
-4. **install.sh testing** (Goal 5) — secondary distribution channel
-5. **USAGE.md doctor docs** (Goal 6) — documentation for the new feature
-6. **Roadmap closure** (Goal 7) — housekeeping, do last
+1. **Project init** (Goal 1) — infrastructure first, everything depends on it
+2. **Push + CI validation** (Goal 2) — unblocks everything, catches breakage immediately
+3. **Tag v0.2.0 + release workflow** (Goal 4) — produces the artifacts Goals 5-6 depend on
+4. **Homebrew tap + formula** (Goals 3 + 5) — primary distribution channel
+5. **install.sh testing** (Goal 6) — secondary distribution channel
+6. **USAGE.md doctor docs** (Goal 7) — documentation for the new feature
+7. **Roadmap closure** (Goal 8) — housekeeping, do last
 
 ## Where We're Headed
 
-This session takes SuperMac from "code complete" to "shipped." After these 7 goals, the project has:
+This session takes SuperMac from "code complete" to "shipped." After these 8 goals, the project has:
 - A green CI pipeline catching regressions on every push
 - A v0.2.0 release with signed binaries on GitHub
 - Two working install paths: `brew install` and `curl | bash`

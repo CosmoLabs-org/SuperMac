@@ -1,0 +1,36 @@
+next_id:
+  bug: 10
+  feature: 7
+  task: 1
+  improvement: 1
+issues:
+  - id: BUG-001
+    file: BUG-001.yaml
+  - id: BUG-002
+    file: BUG-002.yaml
+  - id: BUG-003
+    file: BUG-003.yaml
+  - id: BUG-004
+    file: BUG-004.yaml
+  - id: BUG-005
+    file: BUG-005.yaml
+  - id: BUG-006
+    file: BUG-006.yaml
+  - id: BUG-007
+    file: BUG-007.yaml
+  - id: BUG-008
+    file: BUG-008.yaml
+  - id: BUG-009
+    file: BUG-009.yaml
+  - id: FEAT-001
+    file: FEAT-001.yaml
+  - id: FEAT-002
+    file: FEAT-002.yaml
+  - id: FEAT-003
+    file: FEAT-003.yaml
+  - id: FEAT-004
+    file: FEAT-004.yaml
+  - id: FEAT-005
+    file: FEAT-005.yaml
+  - id: FEAT-006
+    file: FEAT-006.yaml
