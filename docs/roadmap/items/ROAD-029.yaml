@@ -1,9 +1,11 @@
 id: ROAD-029
 created_at: 2026-04-08T02:31:29.272719+02:00
-updated_at: 2026-04-08T02:31:29.274199+02:00
+updated_at: 2026-04-09T08:50:09.629122-03:00
 title: Port display module (brightness, dark mode, Night Shift)
 description: 428 lines. Heavy osascript usage for brightness and dark mode.
-status: captured
+status: completed
 tags:
     - area:go-module-display
 parent: ROAD-018
+completed_in: v0.1.2
+completed_at: 2026-04-09T08:50:09.629118-03:00

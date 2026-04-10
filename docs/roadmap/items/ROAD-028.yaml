@@ -1,9 +1,11 @@
 id: ROAD-028
 created_at: 2026-04-08T02:31:29.234892+02:00
-updated_at: 2026-04-08T02:31:29.236187+02:00
+updated_at: 2026-04-09T08:50:09.589452-03:00
 title: Port network module (IP, DNS, connectivity, reset)
 description: 484 lines. Uses sudo for DNS flush and network reset. Reset deletes system plists — needs safety guard.
-status: captured
+status: completed
 tags:
     - area:go-module-network
 parent: ROAD-018
+completed_in: v0.1.2
+completed_at: 2026-04-09T08:50:09.589448-03:00

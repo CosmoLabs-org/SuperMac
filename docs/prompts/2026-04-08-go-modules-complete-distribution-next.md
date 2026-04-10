@@ -1,19 +1,22 @@
 ---
-title: "SuperMac Go Rewrite — Modules Complete, Distribution Phase Next"
-created: 2026-04-08
-status: PENDING
-priority: critical
 branch: master
-origin: "/continuation-prompt"
-tags: [continuation, go-rewrite, distribution, release]
-goals_total: 5
+created: "2026-04-08"
 goals_completed: 0
-carried_over_from: "docs/prompts/2026-04-08-go-modules-and-fixes.md"
-carried_over_goals: 0
+goals_total: 5
+origin: /continuation-prompt
+priority: critical
 related_prompts:
-  - docs/prompts/2026-04-08-go-modules-and-fixes.md
-  - docs/prompts/2026-04-08-go-rewrite-implementation.md
-  - docs/prompts/2026-04-07-supermac-audit-followup.md
+    - docs/prompts/2026-04-08-go-modules-and-fixes.md
+    - docs/prompts/2026-04-08-go-rewrite-implementation.md
+    - docs/prompts/2026-04-07-supermac-audit-followup.md
+started: "2026-04-08"
+status: STARTED
+tags:
+    - continuation
+    - go-rewrite
+    - distribution
+    - release
+title: SuperMac Go Rewrite — Modules Complete, Distribution Phase Next
 ---
 
 # SuperMac Go Rewrite — Modules Complete, Distribution Phase Next

@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-08
+
+### Added
+
+**Go rewrite** — Complete rewrite from Bash to Go with 1:1 parity plus extras.
+
+- **12 modules, 127 commands** — finder, wifi, network, system, dev, display, dock, audio, screenshot, bluetooth, apps, power
+- **DarwinPlatform** — Real macOS system calls via `platform.Interface`
+- **92 unit tests** — Stub platform + mock pattern for full module coverage
+- **Power module** — 20 developer toggles (caffeinate, hidden-files, gatekeeper, animations, etc.)
+- **Bluetooth module** — 6 commands via blueutil (status, connect, disconnect, power, discoverable)
+- **Apps module** — 6 commands (list, info, cache-clear, recent, kill, open)
+- **21 new commands** across existing modules (disk-usage, processes, uptime, speed-test, connections, etc.)
+- **8 global shortcuts** — ip, cleanup, restart-finder, kp, vol, dark, light, search
+- **Shell completions** — `mac completion bash|zsh|fish|powershell`
+- **CI/CD** — GitHub Actions for test + build on push, tag-triggered releases (darwin arm64/amd64)
+- **Install script** — curl-able installer with arch detection and checksum verification
+- **Homebrew formula** — `Formula/supermac.rb` for tap-based installation
+- **Backward-compatible aliases** — display light-mode/toggle-mode, network info, audio input/output
+- Cobra-based CLI with `--json`, `--quiet`, `--no-color`, `--verbose`, `--dry-run`, `--yes` flags
+
 ## [0.1.2] - 2026-04-08
 
 ### Added

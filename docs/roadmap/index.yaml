@@ -1,37 +1,43 @@
 version: "1.0"
 project: SuperMac
-last_updated: 2026-04-08T06:44:16.980652+02:00
+last_updated: 2026-04-09T08:50:09.71191-03:00
 next_id: 32
 items:
     - id: ROAD-031
       title: Port remaining modules (dock, finder, audio, screenshot)
-      status: captured
+      status: completed
       parent: ROAD-018
+      completed_in: v0.1.2
       created_at: 2026-04-08T02:31:29.349959+02:00
     - id: ROAD-030
       title: Port dev module (kill-port, servers, processes, UUID)
-      status: captured
+      status: completed
       parent: ROAD-018
+      completed_in: v0.1.2
       created_at: 2026-04-08T02:31:29.309848+02:00
     - id: ROAD-029
       title: Port display module (brightness, dark mode, Night Shift)
-      status: captured
+      status: completed
       parent: ROAD-018
+      completed_in: v0.1.2
       created_at: 2026-04-08T02:31:29.272719+02:00
     - id: ROAD-028
       title: Port network module (IP, DNS, connectivity, reset)
-      status: captured
+      status: completed
       parent: ROAD-018
+      completed_in: v0.1.2
       created_at: 2026-04-08T02:31:29.234892+02:00
     - id: ROAD-027
       title: Port wifi module (on/off/toggle/status/scan/connect)
-      status: captured
+      status: completed
       parent: ROAD-018
+      completed_in: v0.1.2
       created_at: 2026-04-08T02:31:29.194523+02:00
     - id: ROAD-026
       title: Port system module (info, cleanup, battery, memory, CPU)
-      status: captured
+      status: completed
       parent: ROAD-018
+      completed_in: v0.1.2
       created_at: 2026-04-08T02:31:29.157803+02:00
     - id: ROAD-025
       title: Output formatting system
@@ -78,7 +84,7 @@ items:
       created_at: 2026-04-08T02:23:22.821083+02:00
     - id: ROAD-019
       title: 'Go Rewrite: Distribution & Release'
-      status: planned
+      status: in_progress
       priority: 80
       effort: large
       depends_on:
@@ -90,11 +96,12 @@ items:
       created_at: 2026-04-08T02:23:22.784282+02:00
     - id: ROAD-018
       title: 'Go Rewrite: Module Port'
-      status: planned
+      status: completed
       priority: 90
       effort: large
       depends_on:
         - ROAD-017
+      completed_in: v0.1.2
       created_at: 2026-04-08T02:23:22.749367+02:00
     - id: ROAD-017
       title: 'Go Rewrite: Foundation'

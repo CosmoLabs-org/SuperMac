@@ -1,6 +1,6 @@
 id: ROAD-019
 created_at: 2026-04-08T02:23:22.784282+02:00
-updated_at: 2026-04-08T02:29:16.919681+02:00
+updated_at: 2026-04-08T18:40:05.392356-03:00
 title: 'Go Rewrite: Distribution & Release'
 description: |-
     Set up distribution channels, CI/CD, and auto-update mechanism. Makes SuperMac installable everywhere.
@@ -21,7 +21,7 @@ description: |-
     - Signed checksums (GPG or GitHub attestation)
 
     Estimated effort: Large (3-5 days)
-status: planned
+status: in_progress
 priority: 80
 effort: large
 tags:

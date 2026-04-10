@@ -1,9 +1,11 @@
 id: ROAD-026
 created_at: 2026-04-08T02:31:29.157803+02:00
-updated_at: 2026-04-08T02:31:29.160076+02:00
+updated_at: 2026-04-09T08:50:09.506001-03:00
 title: Port system module (info, cleanup, battery, memory, CPU)
 description: 541 lines of Bash. Most complex module. system_cleanup() has 7+ destructive operations — needs careful port with dry-run support.
-status: captured
+status: completed
 tags:
     - area:go-module-system
 parent: ROAD-018
+completed_in: v0.1.2
+completed_at: 2026-04-09T08:50:09.505992-03:00
