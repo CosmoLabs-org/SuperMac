@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'supermac-go/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'supermac-go/**'
+      - '.github/workflows/ci.yml'
+
+defaults:
+  run:
+    working-directory: supermac-go
+
+jobs:
+  test:
+    name: Test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: supermac-go/go.mod
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Run vet
+        run: go vet ./...
+
+  build:
+    name: Build (${{ matrix.goos }}/${{ matrix.goarch }})
+    runs-on: macos-latest
+    needs: test
+    strategy:
+      matrix:
+        include:
+          - goos: darwin
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: supermac-go/go.mod
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          VERSION="${REF_NAME}@${SHA}"
+          BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          go build \
+            -ldflags "-X github.com/cosmolabs-org/supermac/internal/version.Version=${VERSION} -X github.com/cosmolabs-org/supermac/internal/version.BuildDate=${BUILD_DATE}" \
+            -o mac-${GOOS}-${GOARCH} \
+            ./cmd/mac
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: supermac-go/mac-${{ matrix.goos }}-${{ matrix.goarch }}

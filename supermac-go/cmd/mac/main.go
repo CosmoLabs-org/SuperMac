@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/cosmolabs-org/supermac/internal/config"
+	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 	"github.com/cosmolabs-org/supermac/internal/output"
 	"github.com/cosmolabs-org/supermac/internal/platform"
@@ -56,6 +57,29 @@ func main() {
 	// Built-in commands
 	rootCmd.AddCommand(versionCmd())
 	rootCmd.AddCommand(configCmd())
+	rootCmd.AddCommand(doctorCmd())
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "completion [bash|zsh|fish|powershell]",
+		Short: "Generate shell completion script",
+		Long:  "Generate shell completion script for mac.\n\nUsage:\n  mac completion zsh > ~/.zfunc/_mac\n  mac completion bash > /etc/bash_completion.d/mac\n  mac completion fish > ~/.config/fish/completions/mac.fish",
+		ValidArgs: []string{"bash", "zsh", "fish", "powershell"},
+		Args:      cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			switch args[0] {
+			case "bash":
+				rootCmd.GenBashCompletion(os.Stdout)
+			case "zsh":
+				rootCmd.GenZshCompletion(os.Stdout)
+			case "fish":
+				rootCmd.GenFishCompletion(os.Stdout, true)
+			case "powershell":
+				rootCmd.GenPowerShellCompletionWithDesc(os.Stdout)
+			default:
+				fmt.Fprintf(os.Stderr, "Unsupported shell: %s\n", args[0])
+				os.Exit(1)
+			}
+		},
+	})
 
 	// Register all modules as Cobra subcommands
 	registerModules(rootCmd)
@@ -170,7 +194,11 @@ func registerModules(rootCmd *cobra.Command) {
 				Short: cmd.Description,
 				Aliases: cmd.Aliases,
 				RunE: func(subCmd *cobra.Command, args []string) error {
-					ctx := &module.Context{
+						// Auto-check dependencies for this command
+						if err := checkModuleDeps(mod, cmd.Name); err != nil {
+							return err
+						}
+						ctx := &module.Context{
 						Config:   loadConfig(),
 						Output:   getOutput(),
 						Platform: getPlatform(),
@@ -338,4 +366,82 @@ func addShortcuts(rootCmd *cobra.Command) {
 			},
 		})
 	}
+}
+
+// checkModuleDeps verifies all dependencies for a module command are met.
+func checkModuleDeps(mod module.Module, commandName string) error {
+	for _, d := range mod.Dependencies() {
+		if d.AffectsCommand(commandName) {
+			interactive := !quietFlag
+			if yesFlag {
+				os.Setenv("SUPERMAC_AUTO_INSTALL", "1")
+			}
+			if err := d.Ensure(interactive); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func doctorCmd() *cobra.Command {
+	var fixFlag bool
+	cmd := &cobra.Command{
+		Use:   "doctor",
+		Short: "Check system dependencies and health",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println()
+			fmt.Println("  SuperMac Health Check")
+			fmt.Println()
+
+			total := 0
+			passed := 0
+
+			// Check Homebrew
+			total++
+			if brewPath, ok := dep.CheckBrew(); ok {
+				fmt.Printf("  ✓ brew              installed (%s)\n", brewPath)
+				passed++
+			} else {
+				fmt.Println("  ✗ brew              not installed")
+				fmt.Println("    Install from https://brew.sh")
+			}
+
+			fmt.Println()
+			fmt.Println("  Module Dependencies:")
+
+			modules := module.All()
+			for _, mod := range modules {
+				for _, d := range mod.Dependencies() {
+					total++
+					if d.IsInstalled() {
+						fmt.Printf("  ✓ %-18s installed\n", d.Name)
+						passed++
+					} else {
+						if fixFlag {
+							fmt.Printf("  → %-18s installing...\n", d.Name)
+							if err := d.Install(); err != nil {
+								fmt.Printf("  ✗ %-18s install failed: %v\n", d.Name, err)
+							} else {
+								fmt.Printf("  ✓ %-18s installed\n", d.Name)
+								passed++
+							}
+						} else {
+							fmt.Printf("  ✗ %-18s missing     brew install %s\n", d.Name, d.Brew)
+						}
+					}
+				}
+			}
+
+			fmt.Println()
+			if passed == total {
+				fmt.Printf("  All %d checks passed.\n", total)
+			} else {
+				fmt.Printf("  %d/%d checks passed. Run 'mac doctor --fix' to install missing dependencies.\n", passed, total)
+			}
+			fmt.Println()
+		},
+	}
+	cmd.Flags().BoolVar(&fixFlag, "fix", false, "Auto-install missing dependencies")
+	return cmd
 }

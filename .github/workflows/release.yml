@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+defaults:
+  run:
+    working-directory: supermac-go
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: supermac-go/go.mod
+
+      - name: Run tests
+        run: go test ./...
+
+  release:
+    name: Release
+    runs-on: macos-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: supermac-go/go.mod
+
+      - name: Build binaries
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          VERSION="${REF_NAME}"
+          BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          LDFLAGS="-X github.com/cosmolabs-org/supermac/internal/version.Version=${VERSION} -X github.com/cosmolabs-org/supermac/internal/version.BuildDate=${BUILD_DATE}"
+
+          mkdir -p dist
+
+          GOOS=darwin GOARCH=arm64 go build -ldflags "$LDFLAGS" -o dist/mac-arm64 ./cmd/mac
+          GOOS=darwin GOARCH=amd64 go build -ldflags "$LDFLAGS" -o dist/mac-amd64 ./cmd/mac
+
+          cd dist
+          tar czf mac-arm64.tar.gz mac-arm64
+          tar czf mac-amd64.tar.gz mac-amd64
+          shasum -a 256 *.tar.gz > checksums.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            supermac-go/dist/mac-arm64.tar.gz
+            supermac-go/dist/mac-amd64.tar.gz
+            supermac-go/dist/checksums.txt
