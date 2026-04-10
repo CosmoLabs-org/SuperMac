@@ -20,6 +20,6 @@ class Supermac < Formula
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/mac --version")
+    assert_match version.to_s, shell_output("#{bin}/mac version")
   end
 end
