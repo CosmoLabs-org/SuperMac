@@ -1,10 +1,10 @@
 id: BUG-007
 type: bug
 created_at: 2026-04-07T17:57:44.781954+02:00
-updated_at: 2026-04-07T17:57:44.781957+02:00
+updated_at: 2026-04-11T07:19:35.414188-03:00
 source: local
 severity: high
-status: open
+status: closed
 area: ux
 title: config.json is dead code never read at runtime
 description: config.json defines default_settings (screenshot_location, volume_step, brightness_step, etc) but get_config() in utils.sh:429 is never called by any module. All modules hardcode defaults. Users who edit config.json see zero effect.

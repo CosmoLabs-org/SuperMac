@@ -1,10 +1,12 @@
 id: ROAD-016
 created_at: 2026-04-07T22:07:28.490539+02:00
-updated_at: 2026-04-07T22:07:28.49272+02:00
+updated_at: 2026-04-11T08:49:03.607073-03:00
 title: 'BUG-009: Bash 3.2 declare -A incompatibility'
 description: bin/mac uses declare -A at line 47 which requires Bash 4+. macOS ships Bash 3.2 as /bin/bash. Refactor to parallel arrays or add version guard.
-status: captured
+status: completed
 tags:
     - area:core
     - area:compatibility
 parent: ROAD-001
+completed_in: v0.1.2
+completed_at: 2026-04-11T08:49:03.607069-03:00

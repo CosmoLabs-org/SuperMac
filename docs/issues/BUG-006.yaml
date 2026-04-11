@@ -1,10 +1,10 @@
 id: BUG-006
 type: bug
 created_at: 2026-04-07T17:57:44.680302+02:00
-updated_at: 2026-04-07T17:57:44.680322+02:00
+updated_at: 2026-04-11T07:19:35.372951-03:00
 source: local
 severity: high
-status: open
+status: closed
 area: reliability
 title: dev.sh CPU comparison uses string ordering broken for values >= 10%
 description: dev.sh:281-283 uses [[ $cpu > 5.0 ]] which is lexicographic string comparison, not numeric. 10.0 > 5.0 is false because 1 < 5 in ASCII. CPU color highlighting broken for any process using 10%+ CPU. dev_memory_hogs() at line 303 correctly uses bc -l.

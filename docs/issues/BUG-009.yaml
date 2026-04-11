@@ -1,10 +1,10 @@
 id: BUG-009
 type: bug
 created_at: 2026-04-07T22:07:00.668873+02:00
-updated_at: 2026-04-07T22:07:00.668878+02:00
+updated_at: 2026-04-11T07:19:35.506653-03:00
 source: local
 severity: high
-status: open
+status: closed
 title: bin/mac uses declare -A which requires Bash 4+ (macOS ships 3.2)
 description: 'The main dispatcher (bin/mac) uses ''declare -A CATEGORIES'' for associative arrays at line 47. This requires Bash 4+ but macOS ships Bash 3.2 as /bin/bash. Running ''bash bin/mac help'' produces: ''line 47: finder: unbound variable''. The script shebang is #!/bin/bash which always uses the macOS default 3.2. Fix options: (1) Refactor to parallel arrays compatible with Bash 3.2, (2) Change shebang to #!/usr/bin/env bash and document Bash 4+ requirement, (3) Add runtime Bash version check with clear error message.'
 fix_direction: Replace declare -A with Bash 3.2-compatible data structure (parallel arrays or case statements), or add Bash version guard at script start

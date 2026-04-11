@@ -1,6 +1,6 @@
 id: ROAD-003
 created_at: 2026-04-07T21:03:35.779468+02:00
-updated_at: 2026-04-08T02:30:14.707666+02:00
+updated_at: 2026-04-11T08:49:03.462397-03:00
 title: 'Phase 2: Quality'
 description: |-
     Quality improvements for Bash version. Most of this will be superseded by the Go rewrite.
@@ -16,7 +16,7 @@ description: |-
 
     NOTE: If Go rewrite is actively being built, most of Phase 2 is not worth doing in Bash. The Go rewrite solves all of these by design (module interface, Cobra flags, single binary, proper testing). Recommend: skip unless Bash version needs long-term maintenance.
     Estimated effort: Large (1 week)
-status: captured
+status: completed
 priority: 20
 effort: large
 tags:
@@ -28,3 +28,5 @@ depends_on:
 refs:
     - type: plan
       path: docs/audit/latest/upgrade-plan.md
+completed_in: v0.1.2
+completed_at: 2026-04-11T08:49:03.462393-03:00

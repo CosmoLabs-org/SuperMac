@@ -1,10 +1,10 @@
 id: BUG-001
 type: bug
 created_at: 2026-04-07T17:56:58.403942+02:00
-updated_at: 2026-04-07T17:56:58.404058+02:00
+updated_at: 2026-04-11T07:19:35.141741-03:00
 source: local
 severity: critical
-status: open
+status: closed
 area: reliability
 title: rm -rf /tmp/* in system cleanup breaks running applications
 description: lib/system.sh:173 runs rm -rf /tmp/* during cleanup. /tmp contains Unix sockets, PID files, temp databases for running apps. Deleting all contents crashes apps and corrupts data.

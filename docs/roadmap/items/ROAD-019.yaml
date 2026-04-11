@@ -1,6 +1,6 @@
 id: ROAD-019
 created_at: 2026-04-08T02:23:22.784282+02:00
-updated_at: 2026-04-11T02:00:00.000000-03:00
+updated_at: 2026-04-11T08:49:42.212959-03:00
 title: 'Go Rewrite: Distribution & Release'
 description: |-
     Set up distribution channels, CI/CD, and auto-update mechanism. Makes SuperMac installable everywhere.
@@ -48,3 +48,5 @@ linked_issues:
     - FEAT-004
     - FEAT-005
     - FEAT-006
+completed_in: v0.1.2
+completed_at: 2026-04-11T08:49:42.212952-03:00

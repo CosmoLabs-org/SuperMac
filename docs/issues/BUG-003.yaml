@@ -1,10 +1,10 @@
 id: BUG-003
 type: bug
 created_at: 2026-04-07T17:57:44.332315+02:00
-updated_at: 2026-04-07T17:57:44.33233+02:00
+updated_at: 2026-04-11T07:19:35.246154-03:00
 source: local
 severity: critical
-status: open
+status: closed
 area: reliability
 title: Wrong memory statistics on Apple Silicon (page size hardcoded 4096)
 description: system.sh memory functions hardcode page_size=4096. Apple Silicon M1/M2/M3/M4 use 16KB pages (16384 bytes). All memory stats displayed by mac system memory are 4x too low on the most common modern Macs.
