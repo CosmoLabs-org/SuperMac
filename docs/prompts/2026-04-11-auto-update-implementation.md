@@ -41,7 +41,29 @@ Implementation plan: `docs/planning-mode/2026-04-11-auto-update-via-github-relea
 
 Sequential execution — each task builds on the previous. Tasks 1-2 are prerequisites. Tasks 3-4 are checker. Tasks 5-6 are updater. Task 7 wires everything together.
 
-GLM dispatch available for parallel execution of independent chunks (checker vs updater can run in parallel in worktrees).
+### Parallel GLM Dispatch (Recommended)
+
+Tasks 1-3 are independent and can run in parallel via GLM agents. Task 4 (wiring) depends on tasks 2+3 completing first.
+
+```bash
+# Dispatch all independent tasks in parallel:
+ccs glm-agent exec-batch docs/prompts/2026-04-11-auto-update-glm-tasks.yaml
+
+# Or dispatch individually:
+ccs glm-agent exec "Fix config bug + version --raw" --task-id 1
+ccs glm-agent exec "Build checker package" --task-id 2
+ccs glm-agent exec "Build updater package" --task-id 3
+
+# Then after 1-3 complete, Opus reviews and runs task 4 (wiring):
+# Review all worktrees, merge, then execute Task 7-9 in main session
+```
+
+**Task dependency graph:**
+```
+Task 1 (prereqs) ──┐
+Task 2 (checker) ──┼── Task 4 (wiring) ── Task 8 (version output) ── Task 9 (integration)
+Task 3 (updater) ──┘
+```
 
 ## File Scope
 
