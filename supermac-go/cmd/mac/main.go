@@ -1,16 +1,19 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/cosmolabs-org/supermac/internal/config"
 	"github.com/cosmolabs-org/supermac/internal/dep"
 	"github.com/cosmolabs-org/supermac/internal/module"
 	"github.com/cosmolabs-org/supermac/internal/output"
 	"github.com/cosmolabs-org/supermac/internal/platform"
+	"github.com/cosmolabs-org/supermac/internal/update"
 	"github.com/cosmolabs-org/supermac/internal/version"
 
 	// Module registrations
@@ -58,6 +61,7 @@ func main() {
 	rootCmd.AddCommand(versionCmd())
 	rootCmd.AddCommand(configCmd())
 	rootCmd.AddCommand(doctorCmd())
+	rootCmd.AddCommand(updateCmd())
 	rootCmd.AddCommand(&cobra.Command{
 		Use:   "completion [bash|zsh|fish|powershell]",
 		Short: "Generate shell completion script",
@@ -87,16 +91,39 @@ func main() {
 	// Global shortcuts (convenience aliases matching the original Bash CLI)
 	addShortcuts(rootCmd)
 
+	// Pre-run update check (runs after flag parsing via PersistentPreRun)
+	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		// Skip check for the update command itself and quiet mode
+		if quietFlag || cmd.Name() == "update" || cmd.Name() == "completion" {
+			return
+		}
+		cfg, _ := config.Load()
+		if cfg != nil && cfg.Updates.Check {
+			checker := update.NewChecker("CosmoLabs-org/SuperMac", version.Version)
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			rel, _ := checker.CheckAvailable(ctx)
+			cancel()
+			if rel != nil {
+				fmt.Fprintf(os.Stderr, "  ⬆ SuperMac %s available. Run 'mac update' to upgrade.\n", rel.Version)
+			}
+		}
+	}
+
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
 
 func versionCmd() *cobra.Command {
-	return &cobra.Command{
+	var raw bool
+	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "Show version information",
 		Run: func(cmd *cobra.Command, args []string) {
+			if raw {
+				fmt.Println(version.Version)
+				return
+			}
 			w := getOutput()
 			w.Header(fmt.Sprintf("SuperMac v%s", version.Version))
 			fmt.Printf("  Version:    %s\n", version.Version)
@@ -110,8 +137,21 @@ func versionCmd() *cobra.Command {
 			}
 			sort.Strings(names)
 			fmt.Printf("  Modules:    %s\n", strings.Join(names, ", "))
+
+			// Update status
+			checker := update.NewChecker("CosmoLabs-org/SuperMac", version.Version)
+			vctx, vcancel := context.WithTimeout(context.Background(), 2*time.Second)
+			vrel, _ := checker.CheckAvailable(vctx)
+			vcancel()
+			updateStatus := "up to date"
+			if vrel != nil {
+				updateStatus = vrel.Version + " available"
+			}
+			fmt.Printf("  Update:     %s\n", updateStatus)
 		},
 	}
+	cmd.Flags().BoolVar(&raw, "raw", false, "Print version string only (machine-parseable)")
+	return cmd
 }
 
 func configCmd() *cobra.Command {
@@ -137,7 +177,7 @@ func configCmd() *cobra.Command {
 			w.Header("SuperMac Configuration")
 			fmt.Printf("  Format:   %s\n", cfg.Output.Format)
 			fmt.Printf("  Color:    %v\n", cfg.Output.Color)
-			fmt.Printf("  Updates:  %v (%s)\n", cfg.Output.Format, cfg.Updates.Channel)
+			fmt.Printf("  Updates:  %v (%s)\n", cfg.Updates.Check, cfg.Updates.Channel)
 			if len(cfg.Aliases) > 0 {
 				fmt.Println("  Aliases:")
 				for k, v := range cfg.Aliases {
@@ -444,4 +484,56 @@ func doctorCmd() *cobra.Command {
 	}
 	cmd.Flags().BoolVar(&fixFlag, "fix", false, "Auto-install missing dependencies")
 	return cmd
+}
+
+func updateCmd() *cobra.Command {
+	var checkOnly bool
+	var doRollback bool
+
+	cmd := &cobra.Command{
+		Use:   "update",
+		Short: "Update SuperMac to the latest version",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if doRollback {
+				return runRollback()
+			}
+			return runUpdate(checkOnly)
+		},
+	}
+	cmd.Flags().BoolVar(&checkOnly, "check", false, "Check for available update without installing")
+	cmd.Flags().BoolVar(&doRollback, "rollback", false, "Restore previous version from backup")
+	return cmd
+}
+
+func runUpdate(checkOnly bool) error {
+	checker := update.NewChecker("CosmoLabs-org/SuperMac", version.Version)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	rel, err := checker.CheckAvailable(ctx)
+	if err != nil {
+		return fmt.Errorf("checking for updates: %w", err)
+	}
+	if rel == nil {
+		fmt.Printf("SuperMac is up to date (%s)\n", version.Version)
+		return nil
+	}
+	if checkOnly {
+		fmt.Printf("SuperMac %s available (current: %s). Run 'mac update' to upgrade.\n", rel.Version, version.Version)
+		return nil
+	}
+
+	updater, err := update.NewUpdater()
+	if err != nil {
+		return err
+	}
+	return updater.Update(rel)
+}
+
+func runRollback() error {
+	updater, err := update.NewUpdater()
+	if err != nil {
+		return err
+	}
+	return updater.Rollback()
 }
