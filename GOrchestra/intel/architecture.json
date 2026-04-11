@@ -1,15 +1,15 @@
 {
   "version": "1.0",
-  "generated_at": "2026-04-11T15:36:14.622117-03:00",
+  "generated_at": "2026-04-11T17:39:26.981988-03:00",
   "generated_by": "GLM-4.7",
-  "expires_at": "2026-04-12T15:36:14.622117-03:00",
-  "last_analyzed_commit": "18c02e79caf075fc1800d4cb81dc9ce1a73fc08d",
+  "expires_at": "2026-04-12T17:39:26.981988-03:00",
+  "last_analyzed_commit": "6e0ca7f5f93fa024130651f68d5e527c74957cff",
   "summary": "A modular Go CLI tool for controlling and querying various macOS system components like apps, audio, bluetooth, and power.",
   "architecture": "modular monolith",
   "primary_language": "Go",
   "hot_files": [
     "supermac-go/cmd/mac/main.go",
-    "supermac-go/internal/module/module.go",
+    "supermac-go/internal/modules/dev/dev.go",
     "supermac-go/internal/modules/apps/apps.go",
     "supermac-go/internal/modules/system/system.go",
     "supermac-go/internal/config/config.go"
@@ -18,18 +18,18 @@
     "module pattern",
     "command pattern",
     "internal package encapsulation",
-    "standard go project layout"
+    "standard Go project layout"
   ],
   "concerns": [
-    "documentation commits dominating recent history instead of feature work",
-    "uncommitted staged and untracked files indicating incomplete work",
-    "potential overlap between module/ and modules/ directories",
-    "unclear dependency management in internal/dep/"
+    "untracked file in git status indicates incomplete commit hygiene",
+    "flat module structure under internal/modules may become unwieldy as features grow",
+    "empty lib/ and bin/ directories at root suggest mixed tooling or outdated structure",
+    "self-update system introduces supply chain security considerations"
   ],
   "suggestions": [
-    "consolidate module/ and modules/ directories if redundant",
-    "commit or stash the pending changes to maintain a clean state",
-    "shift focus from documentation to core feature development",
-    "clarify the role of the dep/ package"
+    "commit or gitignore the untracked file to maintain clean state",
+    "evaluate if modules need further sub-categorization as the project scales",
+    "consolidate root-level lib/ and bin/ into standard Go build artifacts or remove them",
+    "add checksum verification to the self-update system for security"
   ]
 }
