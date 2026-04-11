@@ -27,6 +27,7 @@ mac <category> <action> [arguments] [flags]
   - [screenshot](#screenshot--screenshot-settings--management)
   - [system](#system--system-information--maintenance)
   - [wifi](#wifi--wifi-control--management)
+- [Doctor and Dependency System](#doctor-and-dependency-system)
 - [Output Formats](#output-formats)
 - [Configuration](#configuration)
 - [Shell Completions](#shell-completions)
@@ -663,6 +664,133 @@ mac wifi forget "OldNetwork"      # Remove saved network
 mac wifi info                     # Detailed connection details
 mac wifi list-saved               # All saved networks
 ```
+
+---
+
+## Doctor and Dependency System
+
+`mac doctor` checks that all external tools required by SuperMac modules are installed and provides one-command remediation.
+
+### Basic Health Check
+
+```bash
+mac doctor
+```
+
+This scans for two categories:
+
+1. **Homebrew** -- verifies `brew` is on PATH (required for auto-install)
+2. **Module dependencies** -- checks each module's declared external tools
+
+**Healthy output:**
+
+```
+  SuperMac Health Check
+
+  ✓ brew              installed (/opt/homebrew/bin/brew)
+
+  Module Dependencies:
+  ✓ SwitchAudioSource installed
+  ✓ blueutil          installed
+  ✓ dockutil          installed
+
+  All 4 checks passed.
+```
+
+**Unhealthy output:**
+
+```
+  SuperMac Health Check
+
+  ✓ brew              installed (/opt/homebrew/bin/brew)
+
+  Module Dependencies:
+  ✓ SwitchAudioSource installed
+  ✗ blueutil          missing     brew install blueutil
+  ✗ dockutil          missing     brew install dockutil
+
+  2/4 checks passed. Run 'mac doctor --fix' to install missing dependencies.
+```
+
+### Auto-Install with --fix
+
+Pass `--fix` to automatically install every missing dependency via Homebrew:
+
+```bash
+mac doctor --fix
+```
+
+```
+  SuperMac Health Check
+
+  ✓ brew              installed (/opt/homebrew/bin/brew)
+
+  Module Dependencies:
+  ✓ SwitchAudioSource installed
+  → blueutil          installing...
+  ✓ blueutil          installed
+  → dockutil          installing...
+  ✓ dockutil          installed
+
+  All 4 checks passed.
+```
+
+If Homebrew itself is missing, `--fix` cannot proceed. Install it first from https://brew.sh.
+
+### Per-Command Auto-Install
+
+Even without running `mac doctor`, dependencies are checked automatically when you invoke a command that needs them. If a required tool is missing, you get an interactive prompt:
+
+```bash
+mac bluetooth status
+```
+
+```
+  blueutil is not installed.
+  Install via Homebrew? [Y/n]: y
+  Installing blueutil...
+  ✓ blueutil installed successfully.
+```
+
+Skip the prompt with the `--yes` (or `-y`) flag or the `SUPERMAC_AUTO_INSTALL=1` environment variable:
+
+```bash
+mac bluetooth status -y                        # auto-confirm install
+SUPERMAC_AUTO_INSTALL=1 mac bluetooth status   # no prompt at all
+```
+
+### Dependency Declaration System
+
+Modules declare their external dependencies by implementing the `Dependencies() []dep.Dependency` method. Each dependency specifies:
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `Name` | Display name shown to the user | `"blueutil"` |
+| `Brew` | Homebrew formula for installation | `"blueutil"` |
+| `Check` | Binary to look for on PATH | `"blueutil"` |
+| `Commands` | Which commands need this dep (nil = all) | `[]string{"add", "remove"}` |
+
+**Current module dependencies:**
+
+| Dependency | Module | Commands | Brew formula |
+|------------|--------|----------|--------------|
+| `SwitchAudioSource` | audio | `input-device`, `output-device` | `switchaudio-osx` |
+| `blueutil` | bluetooth | all | `blueutil` |
+| `dockutil` | dock | `add`, `remove` | `dockutil` |
+
+Modules with no external dependencies (apps, dev, display, finder, network, power, screenshot, system, wifi) use built-in macOS tools only.
+
+### Example: Adding a Dependency to a Module
+
+```go
+func (m *MyModule) Dependencies() []dep.Dependency {
+    return []dep.Dependency{
+        {Name: "jq", Brew: "jq", Check: "jq", Commands: nil},
+    }
+}
+```
+
+Setting `Commands` to `nil` means the dependency is required for every command in the module. Set it to a specific list to require the dependency only for those commands.
 
 ---
 

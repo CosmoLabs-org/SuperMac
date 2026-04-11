@@ -1,6 +1,6 @@
 id: ROAD-019
 created_at: 2026-04-08T02:23:22.784282+02:00
-updated_at: 2026-04-08T18:40:05.392356-03:00
+updated_at: 2026-04-11T02:00:00.000000-03:00
 title: 'Go Rewrite: Distribution & Release'
 description: |-
     Set up distribution channels, CI/CD, and auto-update mechanism. Makes SuperMac installable everywhere.
@@ -21,7 +21,18 @@ description: |-
     - Signed checksums (GPG or GitHub attestation)
 
     Estimated effort: Large (3-5 days)
-status: in_progress
+
+    Completed (v0.2.0, 2026-04-11):
+    - #1 CI: done — ci.yml with test + build matrix (arm64/amd64)
+    - #2 Release: done — release.yml tag-triggered, tarballs + checksums + GitHub Release
+    - #3 Install script: done — install.sh with arch detection, sha256 verification
+    - #4+#8 Homebrew: done — cosmolabs-org/homebrew-tap with real sha256 hashes
+    - #7 Completions: done — mac completion bash|zsh|fish|powershell
+
+    Deferred to future:
+    - #5 npm/bun wrapper
+    - #6 Auto-update mechanism (internal/update/)
+status: completed
 priority: 80
 effort: large
 tags:

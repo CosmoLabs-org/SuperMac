@@ -43,7 +43,7 @@ if [ -z "$VERSION" ]; then
     error "Could not determine latest version. Set INSTALL_VERSION manually."
 fi
 
-DOWNLOAD_URL="https://github.com/$REPO/releases/download/$VERSION/mac-darwin-$ARCH.tar.gz"
+DOWNLOAD_URL="https://github.com/$REPO/releases/download/$VERSION/mac-$ARCH.tar.gz"
 
 info "Installing SuperMac $VERSION ($ARCH)..."
 info "Downloading from $DOWNLOAD_URL"
@@ -62,7 +62,7 @@ if curl -fsSL "$CHECKSUM_URL" -o "$TMPDIR/checksums.txt" 2>/dev/null; then
     info "Verifying checksum..."
     cd "$TMPDIR"
     if command -v shasum &>/dev/null; then
-        EXPECTED=$(grep "mac-darwin-$ARCH.tar.gz" checksums.txt | awk '{print $1}')
+        EXPECTED=$(grep "mac-$ARCH.tar.gz" checksums.txt | awk '{print $1}')
         ACTUAL=$(shasum -a 256 mac.tar.gz | awk '{print $1}')
         if [ "$EXPECTED" != "$ACTUAL" ]; then
             error "Checksum mismatch! Expected $EXPECTED, got $ACTUAL"
@@ -78,6 +78,15 @@ if [ ! -f "$TMPDIR/mac-$ARCH" ]; then
 fi
 
 # Install
+EXISTING=$(command -v "$BINARY" 2>/dev/null || true)
+if [ -n "$EXISTING" ]; then
+    EXISTING_DIR=$(dirname "$EXISTING")
+    if [ "$EXISTING_DIR" != "$INSTALL_DIR" ]; then
+        warn "Existing installation found at $EXISTING"
+        warn "Installing to $INSTALL_DIR — you may have two copies in PATH."
+        warn "Consider removing the old one: rm $EXISTING"
+    fi
+fi
 mkdir -p "$INSTALL_DIR" 2>/dev/null || true
 if [ ! -w "$INSTALL_DIR" ]; then
     warn "$INSTALL_DIR not writable, using sudo..."
@@ -90,7 +99,7 @@ fi
 
 # Verify
 if command -v "$BINARY" &>/dev/null; then
-    INSTALLED=$("$BINARY" --version 2>/dev/null || echo "$VERSION")
+    INSTALLED=$("$BINARY" version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "$VERSION")
     info "Successfully installed SuperMac $INSTALLED to $INSTALL_DIR/$BINARY"
     info "Run 'mac help' to get started."
 else
