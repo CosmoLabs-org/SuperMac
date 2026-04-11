@@ -1,9 +1,9 @@
 id: FEAT-003
 type: feature
 created_at: 2026-04-08T02:23:09.099427+02:00
-updated_at: 2026-04-08T02:23:37.102791+02:00
+updated_at: 2026-04-11T14:04:40.364724-03:00
 source: local
-status: open
+status: closed
 origin:
     roadmap_items:
         - ROAD-017
