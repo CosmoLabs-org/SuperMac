@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-11
+
+### Added
+- add self-update system via GitHub Releases (commit:76acf310)
+
+## [0.2.0] - 2026-04-11
+
+### Added
+- Scaffold Go CLI with Cobra, module interface, platform abstraction, config, and output systems
+- add self-update system via GitHub Releases (commit:76acf310)
+
 ## [0.2.0] - 2026-04-08
 
 ### Added

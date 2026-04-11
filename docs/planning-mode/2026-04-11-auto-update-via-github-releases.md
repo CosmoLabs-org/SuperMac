@@ -1,3 +1,12 @@
+---
+completed: "2026-04-11"
+created: "2026-04-11"
+goals_completed: 44
+goals_total: 44
+status: COMPLETED
+title: Auto-Update via GitHub Releases — Implementation Plan
+---
+
 # Auto-Update via GitHub Releases — Implementation Plan
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.

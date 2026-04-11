@@ -71,7 +71,31 @@ status: complete
 | Distribution | Homebrew tap + install.sh + GitHub Releases |
 | Open items | FEAT-004 (auto-update), ROAD-020 (Desktop App) |
 
+## Continued Work
+
+### FEAT-004 Auto-Update Implementation
+
+Implemented the full auto-update system designed in the first half of this session.
+
+**New files:**
+- `internal/update/checker.go` -- GitHub Releases API client with 24h disk cache and semver comparison
+- `internal/update/updater.go` -- Download, SHA256 verification, tar.gz extraction, atomic binary swap, and rollback support
+- `internal/update/checker_test.go` + `updater_test.go` -- 11 unit tests, all passing
+
+**Modified files:**
+- `cmd/mac/main.go` -- Added `mac update` command (with `--check` and `--rollback` flags), `mac version --raw`, `PersistentPreRun` update check, and update status in version output
+- Fixed `config list` display bug (wrong field name for Updates setting)
+
+**Key properties:** Zero new dependencies -- pure Go stdlib implementation.
+
+### New Commits
+
+1. `76acf31 feat(update): add self-update system via GitHub Releases`
+2. `b228eed docs: add session transcripts`
+3. `6e0ca7f chore: update metadata and session state`
+4. `5d99411 chore: update intel metadata and conversation transcript`
+
 ## What's Next
 
-- **FEAT-004** (auto-update): Design spec complete, implementation plan ready with 9 TDD tasks. Continuation prompt at `docs/prompts/` -- ready for GLM dispatch
+- **FEAT-004** (auto-update): Implementation complete. Remaining: integration testing against a real GitHub Release, update flow QA on both arm64 and amd64
 - **ROAD-020** (Desktop App): Captured but not started -- GUI wrapper around the CLI

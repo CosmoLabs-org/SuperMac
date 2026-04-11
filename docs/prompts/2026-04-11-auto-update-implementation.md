@@ -1,19 +1,21 @@
 ---
-title: "SuperMac — Auto-Update Implementation"
-created: "2026-04-11"
-status: PENDING
-priority: high
 branch: master
-origin: "/brainplan"
-tags: [continuation, implementation, auto-update, distribution]
+completed: "2026-04-11"
+created: "2026-04-11"
+goals_completed: 8
 goals_total: 9
-goals_completed: 0
+origin: /brainplan
+priority: high
 related_prompts:
-  - docs/brainstorming/2026-04-11-auto-update-via-github-releases.md
-  - docs/planning-mode/2026-04-11-auto-update-via-github-releases.md
-brainstorm_ref: docs/brainstorming/2026-04-11-auto-update-via-github-releases.md
-plan_ref: docs/planning-mode/2026-04-11-auto-update-via-github-releases.md
-glm_tasks_ref: docs/prompts/2026-04-11-auto-update-glm-tasks.yaml
+    - docs/brainstorming/2026-04-11-auto-update-via-github-releases.md
+    - docs/planning-mode/2026-04-11-auto-update-via-github-releases.md
+status: COMPLETED
+tags:
+    - continuation
+    - implementation
+    - auto-update
+    - distribution
+title: SuperMac — Auto-Update Implementation
 ---
 
 # SuperMac — Auto-Update Implementation
@@ -27,15 +29,15 @@ Implementation plan: `docs/planning-mode/2026-04-11-auto-update-via-github-relea
 
 ## Goals
 
-- [ ] 1. Fix config list display bug (wrong field for Updates)
-- [ ] 2. Add `mac version --raw` flag
-- [ ] 3. Build checker cache layer (read/write/TTL)
-- [ ] 4. Build checker GitHub API client + semver compare
-- [ ] 5. Build updater download + verify + extract
-- [ ] 6. Build updater atomic swap + rollback
-- [ ] 7. Wire into main.go — update command + pre-run check
-- [ ] 8. Update version output with update status
-- [ ] 9. Integration test + push + tag v0.3.0
+- [x] 1. Fix config list display bug (wrong field for Updates)
+- [x] 2. Add `mac version --raw` flag
+- [x] 3. Build checker cache layer (read/write/TTL)
+- [x] 4. Build checker GitHub API client + semver compare
+- [x] 5. Build updater download + verify + extract
+- [x] 6. Build updater atomic swap + rollback
+- [x] 7. Wire into main.go — update command + pre-run check
+- [x] 8. Update version output with update status
+- [~] 9. Integration test + push + tag v0.3.0 — tests passed, no push/tag done yet
 
 ## Execution Strategy
 

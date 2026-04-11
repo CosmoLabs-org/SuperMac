@@ -1,14 +1,14 @@
 ---
-title: "Auto-Update via GitHub Releases"
+completed: "2026-04-11"
 created: "2026-04-11"
-status: approved
-origin: "/brainplan FEAT-004"
-tags: [auto-update, distribution, github-releases, cross-project]
-related_features:
-  - FEAT-004
-related_roadmap:
-  - ROAD-019
-ccs_feedback: true  # send detailed PoC feedback to CCS for universal release system
+origin: /brainplan FEAT-004
+status: COMPLETED
+tags:
+    - auto-update
+    - distribution
+    - github-releases
+    - cross-project
+title: Auto-Update via GitHub Releases
 ---
 
 # Auto-Update via GitHub Releases

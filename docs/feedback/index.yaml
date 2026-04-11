@@ -1,2 +1,15 @@
-next_id: 1
-items: []
+version: ""
+next_id: 2
+last_updated: "2026-04-11"
+stats:
+    total: 1
+    pending: 1
+    implemented: 0
+    rejected: 0
+    converted: 0
+entries:
+    - id: FB-002
+      title: Auto-Update PoC ready for CCS extraction
+      status: pending
+      from_project: SuperMac
+      created: "2026-04-11T17:45:05.875804-03:00"

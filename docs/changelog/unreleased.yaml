@@ -4,10 +4,7 @@
 
 version: pending
 entries:
-    added:
-        - description: Scaffold Go CLI with Cobra, module interface, platform abstraction, config, and output systems
-          source: manual
-          date: 2026-04-08T06:43:48.645989+02:00
+    added: []
     fixed: []
     changed: []
     deprecated: []
