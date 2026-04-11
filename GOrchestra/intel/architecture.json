@@ -1,16 +1,16 @@
 {
   "version": "1.0",
-  "generated_at": "2026-04-11T15:32:36.101524-03:00",
+  "generated_at": "2026-04-11T15:36:14.622117-03:00",
   "generated_by": "GLM-4.7",
-  "expires_at": "2026-04-12T15:32:36.101524-03:00",
-  "last_analyzed_commit": "15dbb6af329487b19aba7c16f29acfebbc14a6e0",
-  "summary": "A modular Go CLI tool for controlling and querying various macOS system components and settings.",
+  "expires_at": "2026-04-12T15:36:14.622117-03:00",
+  "last_analyzed_commit": "18c02e79caf075fc1800d4cb81dc9ce1a73fc08d",
+  "summary": "A modular Go CLI tool for controlling and querying various macOS system components like apps, audio, bluetooth, and power.",
   "architecture": "modular monolith",
   "primary_language": "Go",
   "hot_files": [
     "supermac-go/cmd/mac/main.go",
+    "supermac-go/internal/module/module.go",
     "supermac-go/internal/modules/apps/apps.go",
-    "supermac-go/internal/modules/dev/dev.go",
     "supermac-go/internal/modules/system/system.go",
     "supermac-go/internal/config/config.go"
   ],
@@ -18,18 +18,18 @@
     "module pattern",
     "command pattern",
     "internal package encapsulation",
-    "standard Go project layout"
+    "standard go project layout"
   ],
   "concerns": [
-    "documentation commits dominating recent activity instead of feature development",
+    "documentation commits dominating recent history instead of feature work",
     "uncommitted staged and untracked files indicating incomplete work",
-    "missing key files like cmd/mac entrypoint in the provided structure",
-    "potential overlap between module/ and modules/ directories"
+    "potential overlap between module/ and modules/ directories",
+    "unclear dependency management in internal/dep/"
   ],
   "suggestions": [
-    "commit or stash the pending changes to maintain a clean working tree",
-    "consolidate module/ and modules/ directories if they serve similar purposes",
-    "shift focus from documentation planning to implementing the planned auto-update feature",
-    "add unit tests for the core modules (power, network, wifi, dock)"
+    "consolidate module/ and modules/ directories if redundant",
+    "commit or stash the pending changes to maintain a clean state",
+    "shift focus from documentation to core feature development",
+    "clarify the role of the dep/ package"
   ]
 }
