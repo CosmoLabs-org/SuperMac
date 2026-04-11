@@ -95,14 +95,17 @@ Triggered in `rootCmd.PersistentPreRunE` in `cmd/mac/main.go`.
 2. If false, skip entirely
 3. Read cache file (~/.supermac/update-cache.json)
 4. If cache exists and age < 24h, use cached result
-5. If cache stale or missing, spawn background goroutine:
+5. If cache stale or missing, run synchronous check with 2s timeout:
    a. GET https://api.github.com/repos/CosmoLabs-org/SuperMac/releases/latest
    b. Parse tag_name -> strip "v" -> semver compare with current version
    c. Match asset: mac-{arch}.tar.gz
    d. Write Release to cache file with timestamp
-6. If new version available, print one-line notice:
+   e. On timeout or error: silently fall back to cached result (if any)
+6. If new version available, print one-line notice before command output:
    "  ^ SuperMac v0.2.2 available. Run 'mac update' to upgrade."
 ```
+
+**Why synchronous, not background goroutine?** A background goroutine has no deterministic point to print — it could interleave with command output, creating garbled text. A synchronous check with a strict 2s timeout is fast enough to be imperceptible, and guarantees the notification prints before any command output. On timeout, the check is silent and the cache is used next time.
 
 ### Cache File Format
 
@@ -124,8 +127,8 @@ Triggered in `rootCmd.PersistentPreRunE` in `cmd/mac/main.go`.
 
 ### Key Behaviors
 
-- Background goroutine never blocks startup — notification prints after first command output
-- GitHub API errors are silent — no noisy warnings on offline/bad network
+- Synchronous check with 2s timeout — never blocks startup meaningfully
+- GitHub API errors/timeouts are silent — fall back to cache, no noisy warnings
 - Rate limit aware: 24h cache = max 1 API call per day per user (well within 60/hr unauthenticated limit)
 - `--quiet` flag suppresses the update notification
 - Dev builds (version = "dev") always show "update available" since dev != any release
@@ -149,15 +152,20 @@ Triggered in `rootCmd.PersistentPreRunE` in `cmd/mac/main.go`.
 6. Download checksums.txt to $TMPDIR/supermac-update/
 7. Verify: SHA256 computed against tarball, compare with checksums.txt entry
 8. Extract binary from tarball -> $TMPDIR/supermac-update/mac
-9. Verify extracted binary runs: exec with "version" arg, confirm version matches
+9. Verify extracted binary: code-sign it (codesign -f -s -), then exec with "version" arg,
+   parse output for version string to confirm it matches the expected release version
 10. Atomic swap:
     a. Rename current binary: /usr/local/bin/mac -> /usr/local/bin/mac.bak
-    b. Copy new binary: $TMPDIR/supermac-update/mac -> /usr/local/bin/mac
+       (same filesystem — guaranteed on standard macOS installs)
+    b. Copy (io.Copy, NOT rename) new binary: $TMPDIR/supermac-update/mac -> /usr/local/bin/mac
+       Uses io.Copy because $TMPDIR may be on a different filesystem than install dir
     c. Preserve permissions: chmod to match old binary
-    d. Remove quarantine: xattr -d com.apple.quarantine on new binary
-    e. Cleanup: rm -rf $TMPDIR/supermac-update/
+    d. Code-sign the new binary: codesign -f -s - /usr/local/bin/mac
+       (required for macOS Gatekeeper — matches CLAUDE.md binary deployment policy)
+    e. Remove quarantine: xattr -d com.apple.quarantine on new binary
+    f. Cleanup: rm -rf $TMPDIR/supermac-update/
 11. Report: "SuperMac updated v0.2.1 -> v0.2.2"
-12. If step 10b fails: rename mac.bak back to mac (restore)
+12. Error recovery: if step 10b fails, rename mac.bak back to mac (restore)
 ```
 
 ### Rollback (`mac update --rollback`)
@@ -193,11 +201,25 @@ Installed via Homebrew. Run 'brew upgrade supermac' instead.
 | Swap fails (permission) | "Cannot replace binary. Try: sudo mac update" |
 | Swap fails (other) | Restore mac.bak, report error |
 | No .bak file for rollback | "No previous version found for rollback." |
-| Concurrent update runs | File lock via flock on binary — second instance fails gracefully |
+| Concurrent update runs | PID-based lock file at `$TMPDIR/supermac-update.lock` — second instance detects and exits |
 
 ---
 
 ## Section 4: CLI Commands & Config
+
+### Prerequisite: Fix Config Display Bug
+
+`cmd/mac/main.go` line 140 displays the wrong field for Updates status:
+
+```go
+// BUG: prints cfg.Output.Format instead of cfg.Updates.Check
+fmt.Printf("  Updates:  %v (%s)\n", cfg.Output.Format, cfg.Updates.Channel)
+```
+
+Fix to:
+```go
+fmt.Printf("  Updates:  %v (%s)\n", cfg.Updates.Check, cfg.Updates.Channel)
+```
 
 ### Commands
 
@@ -205,7 +227,7 @@ Installed via Homebrew. Run 'brew upgrade supermac' instead.
 mac update              # Update to latest version
 mac update --check      # Check for available update (no download)
 mac update --rollback   # Restore previous version from .bak
-mac update --yes        # Skip confirmation prompt (for scripts)
+# Note: global --yes/-y flag skips confirmation prompts (already exists on rootCmd)
 ```
 
 ### Config
@@ -215,12 +237,21 @@ Already wired in `internal/config/config.go`. No schema changes needed.
 ```yaml
 updates:
   check: true        # Enable/disable background check on launch
-  channel: stable    # Only checks latest non-prerelease
+  channel: stable    # Only checks latest non-prerelease. "beta" reserved for future use.
 ```
+
+**Beta channel**: The `beta` value is reserved for future implementation. When set, the checker behaves identically to `stable` and prints a one-time notice: "Beta channel is not yet supported. Using stable."
 
 ### Version Output Enhancement
 
+Add `--raw` flag to `mac version` for machine-parseable output (used by the updater for binary verification):
+
 ```bash
+$ mac version --raw
+0.2.2
+```
+
+Normal output gains an update status line:
 $ mac version
 +------------------+
 | SuperMac v0.2.2  |
